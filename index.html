@@ -14,6 +14,7 @@
             height: 100vh; 
             font-family: Arial, sans-serif;
             overflow: hidden;
+            user-select: none;
         }
         #counter-container {
             position: absolute;
@@ -56,72 +57,160 @@
             pointer-events: none;
         }
         #jumpscare-layer img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        /* Cửa sổ nhỏ đẹp hơn */
+        .window-container {
+            position: fixed;
+            background: rgba(20, 20, 30, 0.85);
+            border: 2px solid #ff0040;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(255, 0, 64, 0.6);
+            overflow: hidden;
+            z-index: 50;
+            pointer-events: auto;
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Courier New', monospace;
+            color: #ff3366;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #ff3366;
+            transition: box-shadow 0.2s;
+            animation: glowPulse 2s infinite alternate;
+        }
+        .window-container:hover {
+            box-shadow: 0 0 60px rgba(255, 0, 64, 1);
+        }
+        @keyframes glowPulse {
+            0% { box-shadow: 0 0 15px rgba(255, 0, 64, 0.3); }
+            100% { box-shadow: 0 0 40px rgba(255, 0, 64, 0.9); }
+        }
+        .window-container .number {
+            font-size: 3em;
+            animation: flicker 0.5s infinite alternate;
+        }
+        @keyframes flicker {
+            0% { opacity: 0.7; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1.1); }
+        }
+        /* Nút đóng ẩn nhưng vẫn hoạt động */
+        .window-container .close-btn {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            color: #ff0040;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            background: rgba(0,0,0,0.5);
+            padding: 0 8px;
+            border-radius: 50%;
+            line-height: 1.2;
+            transition: 0.2s;
+        }
+        .window-container .close-btn:hover {
+            color: #fff;
+            background: #ff0040;
         }
     </style>
 </head>
 <body>
 
-    <!-- Khu vực đếm số nhỏ -->
     <div id="counter-container"></div>
 
-    <!-- Nội dung chính -->
     <div id="main-content">
         <h1>CHÀO MỪNG</h1>
         <p>Di chuột xung quanh...</p>
     </div>
 
-    <!-- Lớp jumpscare (ẩn mặc định) -->
     <div id="jumpscare-layer">
-        <img src="https://media.tenor.com/On7KVX9l2eAAAAAj/scary-face.gif" alt="Jumpscare" />
+        <img src="https://i.pinimg.com/originals/9a/1e/fe/9a1efee781490b1bf24a5fd54f0ce895.gif" alt="Jumpscare" />
     </div>
 
     <script>
-        // --- 1. Tạo nhiều cửa sổ nhỏ (popup) ---
-        function createSmallWindows(count) {
-            for (let i = 0; i < count; i++) {
-                // Tính kích thước ngẫu nhiên (100x100 đến 300x300)
-                const w = Math.floor(Math.random() * 200) + 100;
-                const h = Math.floor(Math.random() * 200) + 100;
-                // Vị trí ngẫu nhiên không tràn màn hình
-                const left = Math.floor(Math.random() * (window.screen.availWidth - w));
-                const top = Math.floor(Math.random() * (window.screen.availHeight - h));
+        // --- 1. Cửa sổ nhỏ di chuyển toàn màn hình và đẹp ---
+        const windows = [];
+        function createWindow() {
+            const w = Math.floor(Math.random() * 100) + 60;  // 60-160px
+            const h = Math.floor(Math.random() * 100) + 60;
+            const left = Math.random() * (window.innerWidth - w);
+            const top = Math.random() * (window.innerHeight - h);
 
-                const win = window.open(
-                    "",
-                    "_blank",
-                    `width=${w},height=${h},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no,scrollbars=no,resizable=no`
-                );
-                if (win) {
-                    // Đổ nội dung vào cửa sổ nhỏ
-                    win.document.write(`
-                        <html><head><style>
-                            body { 
-                                background-color: #1a1a1a; 
-                                color: #ff5555; 
-                                font-family: monospace; 
-                                display: flex; 
-                                justify-content: center; 
-                                align-items: center; 
-                                height: 100%; 
-                                margin: 0; 
-                                overflow: hidden;
-                                font-size: 20px;
-                            }
-                            .number { font-size: 40px; font-weight: bold; }
-                        </style></head>
-                        <body>
-                            <div class="number">${Math.floor(Math.random() * 9999) + 1}</div>
-                        </body></html>
-                    `);
-                    win.document.close();
+            const div = document.createElement('div');
+            div.className = 'window-container';
+            div.style.width = w + 'px';
+            div.style.height = h + 'px';
+            div.style.left = left + 'px';
+            div.style.top = top + 'px';
+
+            // Số ngẫu nhiên
+            const num = Math.floor(Math.random() * 99999) + 1;
+            const numSpan = document.createElement('span');
+            numSpan.className = 'number';
+            numSpan.textContent = num;
+            div.appendChild(numSpan);
+
+            // Nút đóng (ẩn nhưng để đóng thủ công nếu cần)
+            const closeBtn = document.createElement('span');
+            closeBtn.className = 'close-btn';
+            closeBtn.textContent = '×';
+            closeBtn.onclick = function(e) {
+                e.stopPropagation();
+                div.remove();
+                const idx = windows.indexOf(div);
+                if (idx > -1) windows.splice(idx, 1);
+            };
+            div.appendChild(closeBtn);
+
+            document.body.appendChild(div);
+            windows.push(div);
+
+            // --- Chuyển động toàn màn hình (ngẫu nhiên, đổi hướng khi chạm biên) ---
+            let speedX = (Math.random() - 0.5) * 2.5;
+            let speedY = (Math.random() - 0.5) * 2.5;
+            // Đổi hướng sau mỗi 1-4 giây
+            const changeDirection = setInterval(() => {
+                speedX = (Math.random() - 0.5) * 3;
+                speedY = (Math.random() - 0.5) * 3;
+            }, 1000 + Math.random() * 3000);
+
+            function moveWindow() {
+                if (!div.parentNode) {
+                    clearInterval(changeDirection);
+                    clearInterval(moveInterval);
+                    return;
                 }
+                let left = parseFloat(div.style.left);
+                let top = parseFloat(div.style.top);
+                const w = parseFloat(div.style.width);
+                const h = parseFloat(div.style.height);
+                
+                left += speedX;
+                top += speedY;
+
+                // Bounce tại biên
+                if (left <= 0) { left = 0; speedX = -speedX; }
+                if (top <= 0) { top = 0; speedY = -speedY; }
+                if (left >= window.innerWidth - w) { left = window.innerWidth - w; speedX = -speedX; }
+                if (top >= window.innerHeight - h) { top = window.innerHeight - h; speedY = -speedY; }
+
+                div.style.left = left + 'px';
+                div.style.top = top + 'px';
             }
+
+            const moveInterval = setInterval(moveWindow, 16); // ~60fps
+
+            // Lưu interval để dừng khi xóa
+            div.dataset.moveInterval = moveInterval;
+            div.dataset.changeInterval = changeDirection;
         }
 
-        // --- 2. Hàm tạo chữ số nhỏ chạy quanh màn hình (floaters) ---
+        // --- 2. Số nhỏ bay lung tung (floaters) ---
         function createFloatingNumbers(count) {
             const container = document.getElementById('counter-container');
             for (let i = 0; i < count; i++) {
@@ -135,15 +224,12 @@
                 span.style.opacity = '0.6';
                 span.style.whiteSpace = 'nowrap';
                 
-                // Vị trí ban đầu ngẫu nhiên
                 const x = Math.random() * window.innerWidth;
                 const y = Math.random() * window.innerHeight;
                 span.style.left = x + 'px';
                 span.style.top = y + 'px';
-                
                 container.appendChild(span);
                 
-                // Chuyển động chậm ngẫu nhiên
                 const speedX = (Math.random() - 0.5) * 0.8;
                 const speedY = (Math.random() - 0.5) * 0.8;
                 const updateInterval = setInterval(() => {
@@ -155,7 +241,6 @@
                     let newLeft = currentLeft + speedX;
                     let newTop = currentTop + speedY;
                     
-                    // Đảo chiều khi chạm biên
                     if (newLeft < 0 || newLeft > window.innerWidth - 50) {
                         span.style.left = Math.random() * window.innerWidth + 'px';
                         span.style.top = Math.random() * window.innerHeight + 'px';
@@ -169,44 +254,43 @@
                         span.style.top = newTop + 'px';
                     }
                 }, 50);
-                
-                // Lưu interval để dừng khi cần (tùy)
                 span.dataset.interval = updateInterval;
             }
         }
 
-        // --- 3. Jumpscare (kích hoạt khi click hoặc di chuột) ---
+        // --- 3. Jumpscare ---
         function triggerJumpscare() {
             const layer = document.getElementById('jumpscare-layer');
-            if (layer.style.display === 'flex') return; // đã hiện thì thôi
+            if (layer.style.display === 'flex') return;
             layer.style.display = 'flex';
-            // Phát âm thanh nếu muốn
-            // const audio = new Audio('scream.mp3'); audio.play();
             setTimeout(() => {
                 layer.style.display = 'none';
-            }, 1200); // ẩn sau 1.2 giây
+            }, 1500);
         }
 
-        // --- Kích hoạt ---
-        // Tạo 20 cửa sổ nhỏ (có thể tăng lên 30-50 nếu muốn)
-        createSmallWindows(20);
-        
-        // Tạo 50 con số nhỏ bay lung tung
-        createFloatingNumbers(50);
+        // --- Khởi tạo ---
+        // Tạo 25 cửa sổ di chuyển toàn màn hình
+        for (let i = 0; i < 25; i++) {
+            setTimeout(() => createWindow(), i * 100);
+        }
+        // Tạo 60 số nhỏ bay
+        createFloatingNumbers(60);
 
-        // Sự kiện kích hoạt jumpscare
+        // Sự kiện jumpscare
         document.addEventListener('click', triggerJumpscare);
         document.addEventListener('mousemove', (e) => {
-            // Kích hoạt nếu di chuột nhanh (ngẫu nhiên 5% cơ hội mỗi lần)
-            if (Math.random() < 0.05) {
-                triggerJumpscare();
-            }
+            if (Math.random() < 0.03) triggerJumpscare();
         });
 
-        // Tạo thêm cửa sổ mới sau mỗi 5 giây (tăng dần)
+        // Tạo thêm cửa sổ mới mỗi 4 giây (tăng dần số lượng)
         setInterval(() => {
-            createSmallWindows(5);
-        }, 5000);
+            createWindow();
+            // Nếu có quá nhiều, xóa bớt cửa sổ cũ
+            if (windows.length > 60) {
+                const old = windows.shift();
+                if (old && old.parentNode) old.remove();
+            }
+        }, 4000);
 
         console.log('Trang web đã sẵn sàng!');
     </script>
