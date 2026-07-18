@@ -6,50 +6,34 @@
     <title>Trang web</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            background-color: #0d0d0d; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            font-family: Arial, sans-serif;
+        body {
+            background-color: #000;
             overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            font-family: Arial, sans-serif;
             user-select: none;
         }
-        #counter-container {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: #00ff00;
-            font-size: 14px;
-            font-family: 'Courier New', monospace;
-            z-index: 100;
+        /* Lớp nền đen che phủ toàn bộ */
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 9998;
             pointer-events: none;
-            text-shadow: 0 0 5px #00ff00;
-            line-height: 1.4;
+            display: block;
         }
-        #main-content {
-            text-align: center;
-            color: #ffffff;
-            z-index: 10;
-        }
-        #main-content h1 {
-            font-size: 48px;
-            color: #ff3333;
-            text-shadow: 0 0 20px #ff3333;
-            margin-bottom: 10px;
-        }
-        #main-content p {
-            font-size: 18px;
-            color: #aaaaaa;
-        }
+        /* Jumpscare ảnh toàn màn hình */
         #jumpscare-layer {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            background-color: #000000;
+            background: #000;
             display: none;
             justify-content: center;
             align-items: center;
@@ -61,130 +45,181 @@
             height: 100%;
             object-fit: cover;
         }
-        /* Cửa sổ nhỏ đẹp hơn */
-        .window-container {
+        /* Cửa sổ con (giống theannoyingsite) */
+        .window-popup {
             position: fixed;
-            background: rgba(20, 20, 30, 0.85);
+            background: #1a1a1a;
             border: 2px solid #ff0040;
-            border-radius: 10px;
-            box-shadow: 0 0 30px rgba(255, 0, 64, 0.6);
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(255, 0, 64, 0.4);
             overflow: hidden;
-            z-index: 50;
-            pointer-events: auto;
-            backdrop-filter: blur(4px);
+            z-index: 100;
             display: flex;
             justify-content: center;
             align-items: center;
             font-family: 'Courier New', monospace;
             color: #ff3366;
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
             text-shadow: 0 0 10px #ff3366;
-            transition: box-shadow 0.2s;
-            animation: glowPulse 2s infinite alternate;
+            cursor: default;
+            animation: popIn 0.3s ease-out;
         }
-        .window-container:hover {
-            box-shadow: 0 0 60px rgba(255, 0, 64, 1);
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
         }
-        @keyframes glowPulse {
-            0% { box-shadow: 0 0 15px rgba(255, 0, 64, 0.3); }
-            100% { box-shadow: 0 0 40px rgba(255, 0, 64, 0.9); }
-        }
-        .window-container .number {
-            font-size: 3em;
-            animation: flicker 0.5s infinite alternate;
+        .window-popup .number {
+            animation: flicker 0.4s infinite alternate;
         }
         @keyframes flicker {
-            0% { opacity: 0.7; transform: scale(0.9); }
+            0% { opacity: 0.6; transform: scale(0.9); }
             100% { opacity: 1; transform: scale(1.1); }
         }
-        /* Nút đóng ẩn nhưng vẫn hoạt động */
-        .window-container .close-btn {
+        /* Nút đóng giả (chỉ để giống) */
+        .window-popup .fake-close {
             position: absolute;
-            top: 5px;
-            right: 10px;
+            top: 2px;
+            right: 6px;
             color: #ff0040;
-            cursor: pointer;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
+            cursor: pointer;
             background: rgba(0,0,0,0.5);
-            padding: 0 8px;
+            padding: 0 6px;
             border-radius: 50%;
             line-height: 1.2;
-            transition: 0.2s;
         }
-        .window-container .close-btn:hover {
+        .window-popup .fake-close:hover {
             color: #fff;
             background: #ff0040;
+        }
+        /* Chữ di chuyển / mờ */
+        .moving-text {
+            position: fixed;
+            color: #ff0040;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            font-weight: bold;
+            pointer-events: none;
+            opacity: 0.7;
+            z-index: 50;
+            text-shadow: 0 0 5px #ff0040;
+            white-space: nowrap;
+            animation: moveText 8s linear infinite alternate;
+        }
+        @keyframes moveText {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(50px, -30px); }
+            50% { transform: translate(-40px, 60px); }
+            75% { transform: translate(30px, -50px); }
+            100% { transform: translate(-20px, 40px); }
+        }
+        /* Nội dung chính (nhưng che khuất) */
+        #main-content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            text-align: center;
+            z-index: 10;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+        #main-content h1 {
+            font-size: 60px;
+            color: #ff3333;
+            text-shadow: 0 0 30px #ff3333;
+        }
+        /* Nút mở cửa sổ mới (giống) */
+        #open-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 12px 24px;
+            background: #ff0040;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 200;
+            box-shadow: 0 0 20px #ff0040;
+            transition: 0.2s;
+        }
+        #open-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 40px #ff0040;
         }
     </style>
 </head>
 <body>
 
-    <div id="counter-container"></div>
-
-    <div id="main-content">
-        <h1>CHÀO MỪNG</h1>
-        <p>Di chuột xung quanh...</p>
-    </div>
+    <div id="overlay"></div>
 
     <div id="jumpscare-layer">
         <img src="https://i.pinimg.com/originals/9a/1e/fe/9a1efee781490b1bf24a5fd54f0ce895.gif" alt="Jumpscare" />
     </div>
 
+    <div id="main-content">
+        <h1>BẠN ĐÃ BỊ TRÚNG</h1>
+        <p style="color:#aaa; font-size:20px;">Không thoát được đâu</p>
+    </div>
+
+    <button id="open-btn">MỞ CỬA SỔ MỚI</button>
+
     <script>
-        // --- 1. Cửa sổ nhỏ di chuyển toàn màn hình và đẹp ---
-        const windows = [];
-        function createWindow() {
-            const w = Math.floor(Math.random() * 100) + 60;  // 60-160px
-            const h = Math.floor(Math.random() * 100) + 60;
-            const left = Math.random() * (window.innerWidth - w);
-            const top = Math.random() * (window.innerHeight - h);
+        // --- Cửa sổ popup di chuyển toàn màn hình (giống theannoyingsite) ---
+        let windowCount = 0;
+        const popups = [];
+
+        function createPopup() {
+            const w = Math.floor(Math.random() * 120) + 60;  // 60-180px
+            const h = Math.floor(Math.random() * 120) + 60;
+            let left = Math.random() * (window.innerWidth - w);
+            let top = Math.random() * (window.innerHeight - h);
 
             const div = document.createElement('div');
-            div.className = 'window-container';
+            div.className = 'window-popup';
             div.style.width = w + 'px';
             div.style.height = h + 'px';
             div.style.left = left + 'px';
             div.style.top = top + 'px';
 
-            // Số ngẫu nhiên
-            const num = Math.floor(Math.random() * 99999) + 1;
+            const num = Math.floor(Math.random() * 999999) + 1;
             const numSpan = document.createElement('span');
             numSpan.className = 'number';
             numSpan.textContent = num;
             div.appendChild(numSpan);
 
-            // Nút đóng (ẩn nhưng để đóng thủ công nếu cần)
-            const closeBtn = document.createElement('span');
-            closeBtn.className = 'close-btn';
-            closeBtn.textContent = '×';
-            closeBtn.onclick = function(e) {
+            // Nút đóng giả
+            const closeFake = document.createElement('span');
+            closeFake.className = 'fake-close';
+            closeFake.textContent = '✕';
+            closeFake.onclick = function(e) {
                 e.stopPropagation();
-                div.remove();
-                const idx = windows.indexOf(div);
-                if (idx > -1) windows.splice(idx, 1);
+                // Không đóng, chỉ đổi số
+                numSpan.textContent = Math.floor(Math.random() * 999999) + 1;
             };
-            div.appendChild(closeBtn);
+            div.appendChild(closeFake);
 
             document.body.appendChild(div);
-            windows.push(div);
+            popups.push(div);
+            windowCount++;
 
-            // --- Chuyển động toàn màn hình (ngẫu nhiên, đổi hướng khi chạm biên) ---
-            let speedX = (Math.random() - 0.5) * 2.5;
-            let speedY = (Math.random() - 0.5) * 2.5;
-            // Đổi hướng sau mỗi 1-4 giây
-            const changeDirection = setInterval(() => {
-                speedX = (Math.random() - 0.5) * 3;
-                speedY = (Math.random() - 0.5) * 3;
-            }, 1000 + Math.random() * 3000);
+            // Chuyển động
+            let speedX = (Math.random() - 0.5) * 4;
+            let speedY = (Math.random() - 0.5) * 4;
+            // Đổi hướng ngẫu nhiên
+            setInterval(() => {
+                speedX = (Math.random() - 0.5) * 5;
+                speedY = (Math.random() - 0.5) * 5;
+            }, 1500 + Math.random() * 3000);
 
-            function moveWindow() {
-                if (!div.parentNode) {
-                    clearInterval(changeDirection);
-                    clearInterval(moveInterval);
-                    return;
-                }
+            function movePopup() {
+                if (!div.parentNode) return;
                 let left = parseFloat(div.style.left);
                 let top = parseFloat(div.style.top);
                 const w = parseFloat(div.style.width);
@@ -193,7 +228,6 @@
                 left += speedX;
                 top += speedY;
 
-                // Bounce tại biên
                 if (left <= 0) { left = 0; speedX = -speedX; }
                 if (top <= 0) { top = 0; speedY = -speedY; }
                 if (left >= window.innerWidth - w) { left = window.innerWidth - w; speedX = -speedX; }
@@ -202,95 +236,79 @@
                 div.style.left = left + 'px';
                 div.style.top = top + 'px';
             }
+            setInterval(movePopup, 16);
 
-            const moveInterval = setInterval(moveWindow, 16); // ~60fps
-
-            // Lưu interval để dừng khi xóa
-            div.dataset.moveInterval = moveInterval;
-            div.dataset.changeInterval = changeDirection;
+            // Tự động đổi số
+            setInterval(() => {
+                if (div.parentNode) {
+                    numSpan.textContent = Math.floor(Math.random() * 999999) + 1;
+                }
+            }, 500 + Math.random() * 1500);
         }
 
-        // --- 2. Số nhỏ bay lung tung (floaters) ---
-        function createFloatingNumbers(count) {
-            const container = document.getElementById('counter-container');
-            for (let i = 0; i < count; i++) {
-                const span = document.createElement('span');
-                span.textContent = Math.floor(Math.random() * 99999) + 1;
-                span.style.position = 'absolute';
-                span.style.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
-                span.style.fontSize = `${Math.floor(Math.random() * 12) + 8}px`;
-                span.style.fontWeight = 'bold';
-                span.style.pointerEvents = 'none';
-                span.style.opacity = '0.6';
-                span.style.whiteSpace = 'nowrap';
-                
-                const x = Math.random() * window.innerWidth;
-                const y = Math.random() * window.innerHeight;
-                span.style.left = x + 'px';
-                span.style.top = y + 'px';
-                container.appendChild(span);
-                
-                const speedX = (Math.random() - 0.5) * 0.8;
-                const speedY = (Math.random() - 0.5) * 0.8;
-                const updateInterval = setInterval(() => {
-                    let currentLeft = parseFloat(span.style.left);
-                    let currentTop = parseFloat(span.style.top);
-                    if (isNaN(currentLeft)) currentLeft = 0;
-                    if (isNaN(currentTop)) currentTop = 0;
-                    
-                    let newLeft = currentLeft + speedX;
-                    let newTop = currentTop + speedY;
-                    
-                    if (newLeft < 0 || newLeft > window.innerWidth - 50) {
-                        span.style.left = Math.random() * window.innerWidth + 'px';
-                        span.style.top = Math.random() * window.innerHeight + 'px';
-                    } else {
-                        span.style.left = newLeft + 'px';
-                    }
-                    if (newTop < 0 || newTop > window.innerHeight - 20) {
-                        span.style.left = Math.random() * window.innerWidth + 'px';
-                        span.style.top = Math.random() * window.innerHeight + 'px';
-                    } else {
-                        span.style.top = newTop + 'px';
-                    }
-                }, 50);
-                span.dataset.interval = updateInterval;
-            }
+        // --- Chữ di chuyển khắp màn hình ---
+        function createMovingText() {
+            const div = document.createElement('div');
+            div.className = 'moving-text';
+            div.textContent = '⚠️ BẠN KHÔNG THỂ THOÁT ⚠️';
+            div.style.left = Math.random() * 80 + '%';
+            div.style.top = Math.random() * 80 + '%';
+            div.style.fontSize = (Math.random() * 20 + 10) + 'px';
+            div.style.animationDuration = (Math.random() * 6 + 4) + 's';
+            document.body.appendChild(div);
         }
 
-        // --- 3. Jumpscare ---
+        // --- Jumpscare ---
         function triggerJumpscare() {
             const layer = document.getElementById('jumpscare-layer');
             if (layer.style.display === 'flex') return;
             layer.style.display = 'flex';
             setTimeout(() => {
                 layer.style.display = 'none';
-            }, 1500);
+            }, 1200);
         }
 
         // --- Khởi tạo ---
-        // Tạo 25 cửa sổ di chuyển toàn màn hình
-        for (let i = 0; i < 25; i++) {
-            setTimeout(() => createWindow(), i * 100);
+        // Tạo 30 cửa sổ ban đầu
+        for (let i = 0; i < 30; i++) {
+            setTimeout(() => createPopup(), i * 150);
         }
-        // Tạo 60 số nhỏ bay
-        createFloatingNumbers(60);
+        // Tạo 20 dòng chữ di chuyển
+        for (let i = 0; i < 20; i++) {
+            createMovingText();
+        }
 
-        // Sự kiện jumpscare
-        document.addEventListener('click', triggerJumpscare);
-        document.addEventListener('mousemove', (e) => {
-            if (Math.random() < 0.03) triggerJumpscare();
+        // Nút mở thêm cửa sổ
+        document.getElementById('open-btn').addEventListener('click', () => {
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => createPopup(), i * 100);
+            }
+            // Cơ hội jumpscare
+            if (Math.random() < 0.3) triggerJumpscare();
         });
 
-        // Tạo thêm cửa sổ mới mỗi 4 giây (tăng dần số lượng)
+        // Click bất kỳ => jumpscare
+        document.addEventListener('click', triggerJumpscare);
+
+        // Di chuột có thể kích hoạt jumpscare
+        document.addEventListener('mousemove', (e) => {
+            if (Math.random() < 0.02) triggerJumpscare();
+        });
+
+        // Tự động thêm cửa sổ mỗi 2 giây
         setInterval(() => {
-            createWindow();
-            // Nếu có quá nhiều, xóa bớt cửa sổ cũ
-            if (windows.length > 60) {
-                const old = windows.shift();
+            createPopup();
+            // Giới hạn số cửa sổ (xóa bớt nếu quá nhiều)
+            if (popups.length > 100) {
+                const old = popups.shift();
                 if (old && old.parentNode) old.remove();
             }
-        }, 4000);
+        }, 2000);
+
+        // Tự động thêm chữ mới mỗi 5 giây
+        setInterval(() => {
+            createMovingText();
+        }, 5000);
 
         console.log('Trang web đã sẵn sàng!');
     </script>
