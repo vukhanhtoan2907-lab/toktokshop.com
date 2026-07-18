@@ -7,26 +7,16 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background-color: #000;
+            background-color: #111;
             overflow: hidden;
             height: 100vh;
             width: 100vw;
-            font-family: Arial, sans-serif;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
             user-select: none;
+            cursor: not-allowed;
         }
-        /* Lớp nền đen che phủ toàn bộ */
-        #overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: #000;
-            z-index: 9998;
-            pointer-events: none;
-            display: block;
-        }
-        /* Jumpscare ảnh toàn màn hình */
+        
+        /* Lớp jumpscare */
         #jumpscare-layer {
             position: fixed;
             top: 0;
@@ -45,141 +35,212 @@
             height: 100%;
             object-fit: cover;
         }
-        /* Cửa sổ con (giống theannoyingsite) */
+
+        /* Cửa sổ popup kiểu Windows 95/XP */
         .window-popup {
             position: fixed;
-            background: #1a1a1a;
-            border: 2px solid #ff0040;
-            border-radius: 8px;
-            box-shadow: 0 0 30px rgba(255, 0, 64, 0.4);
+            background: #c0c0c0;
+            border: 3px solid #fff;
+            border-right-color: #808080;
+            border-bottom-color: #808080;
+            padding: 4px;
+            min-width: 160px;
+            min-height: 120px;
+            box-shadow: 4px 4px 10px rgba(0,0,0,0.8);
+            z-index: 500;
+            display: flex;
+            flex-direction: column;
+            pointer-events: auto;
+            animation: popIn 0.2s ease-out;
+            resize: both;
             overflow: hidden;
-            z-index: 100;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .window-popup .title-bar {
+            background: #000080;
+            color: #fff;
+            padding: 4px 6px;
+            font-size: 13px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+        }
+        .window-popup .title-bar .title {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .window-popup .title-bar .title .icon {
+            width: 16px;
+            height: 16px;
+            background: #ff0040;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .window-popup .title-bar .controls {
+            display: flex;
+            gap: 2px;
+        }
+        .window-popup .title-bar .controls button {
+            background: #c0c0c0;
+            border: 2px solid #fff;
+            border-right-color: #808080;
+            border-bottom-color: #808080;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+        }
+        .window-popup .title-bar .controls button:active {
+            border: 2px solid #808080;
+            border-right-color: #fff;
+            border-bottom-color: #fff;
+        }
+        .window-popup .title-bar .controls .close-btn {
+            background: #ff0040;
+            color: #fff;
+        }
+        .window-popup .title-bar .controls .close-btn:hover {
+            background: #ff3366;
+        }
+        .window-popup .content {
+            background: #fff;
+            padding: 20px 10px;
+            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Courier New', monospace;
-            color: #ff3366;
             font-size: 28px;
             font-weight: bold;
-            text-shadow: 0 0 10px #ff3366;
-            cursor: default;
-            animation: popIn 0.3s ease-out;
+            color: #000;
+            font-family: 'Courier New', monospace;
+            min-height: 80px;
         }
-        @keyframes popIn {
-            0% { transform: scale(0); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
+        .window-popup .content .number {
+            animation: blink 0.5s infinite alternate;
         }
-        .window-popup .number {
-            animation: flicker 0.4s infinite alternate;
-        }
-        @keyframes flicker {
-            0% { opacity: 0.6; transform: scale(0.9); }
+        @keyframes blink {
+            0% { opacity: 0.3; transform: scale(0.9); }
             100% { opacity: 1; transform: scale(1.1); }
         }
-        /* Nút đóng giả (chỉ để giống) */
-        .window-popup .fake-close {
-            position: absolute;
-            top: 2px;
-            right: 6px;
+
+        /* Chữ trôi nổi */
+        .floating-text {
+            position: fixed;
             color: #ff0040;
+            font-family: 'Comic Sans MS', sans-serif;
+            font-size: 14px;
+            font-weight: bold;
+            pointer-events: none;
+            opacity: 0.6;
+            z-index: 10;
+            white-space: nowrap;
+            animation: floatAround 6s linear infinite alternate;
+        }
+        @keyframes floatAround {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(80px, -40px) rotate(5deg); }
+            50% { transform: translate(-60px, 80px) rotate(-5deg); }
+            75% { transform: translate(40px, -60px) rotate(3deg); }
+            100% { transform: translate(-30px, 40px) rotate(-3deg); }
+        }
+
+        /* Nút mở cửa sổ giống Windows */
+        #taskbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100vw;
+            height: 40px;
+            background: #c0c0c0;
+            border-top: 2px solid #fff;
+            border-bottom: 2px solid #808080;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+        }
+        #start-btn {
+            background: #c0c0c0;
+            border: 2px solid #fff;
+            border-right-color: #808080;
+            border-bottom-color: #808080;
+            padding: 4px 14px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            background: rgba(0,0,0,0.5);
-            padding: 0 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #start-btn:active {
+            border: 2px solid #808080;
+            border-right-color: #fff;
+            border-bottom-color: #fff;
+        }
+        #start-btn .logo {
+            width: 18px;
+            height: 18px;
+            background: #ff0040;
             border-radius: 50%;
-            line-height: 1.2;
+            display: inline-block;
         }
-        .window-popup .fake-close:hover {
-            color: #fff;
-            background: #ff0040;
-        }
-        /* Chữ di chuyển / mờ */
-        .moving-text {
-            position: fixed;
-            color: #ff0040;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
+        #taskbar .tray {
+            margin-left: auto;
+            color: #000;
+            font-size: 13px;
             font-weight: bold;
-            pointer-events: none;
-            opacity: 0.7;
-            z-index: 50;
-            text-shadow: 0 0 5px #ff0040;
-            white-space: nowrap;
-            animation: moveText 8s linear infinite alternate;
-        }
-        @keyframes moveText {
-            0% { transform: translate(0, 0); }
-            25% { transform: translate(50px, -30px); }
-            50% { transform: translate(-40px, 60px); }
-            75% { transform: translate(30px, -50px); }
-            100% { transform: translate(-20px, 40px); }
-        }
-        /* Nội dung chính (nhưng che khuất) */
-        #main-content {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #fff;
-            text-align: center;
-            z-index: 10;
-            pointer-events: none;
-            opacity: 0.3;
-        }
-        #main-content h1 {
-            font-size: 60px;
-            color: #ff3333;
-            text-shadow: 0 0 30px #ff3333;
-        }
-        /* Nút mở cửa sổ mới (giống) */
-        #open-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            padding: 12px 24px;
-            background: #ff0040;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            z-index: 200;
-            box-shadow: 0 0 20px #ff0040;
-            transition: 0.2s;
-        }
-        #open-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 40px #ff0040;
+            padding: 4px 12px;
+            background: #c0c0c0;
+            border: 2px solid #808080;
+            border-right-color: #fff;
+            border-bottom-color: #fff;
         }
     </style>
 </head>
 <body>
 
-    <div id="overlay"></div>
-
+    <!-- Lớp jumpscare -->
     <div id="jumpscare-layer">
         <img src="https://i.pinimg.com/originals/9a/1e/fe/9a1efee781490b1bf24a5fd54f0ce895.gif" alt="Jumpscare" />
     </div>
 
-    <div id="main-content">
-        <h1>BẠN ĐÃ BỊ TRÚNG</h1>
-        <p style="color:#aaa; font-size:20px;">Không thoát được đâu</p>
+    <!-- Thanh taskbar kiểu Windows -->
+    <div id="taskbar">
+        <button id="start-btn">
+            <span class="logo"></span> Bắt đầu
+        </button>
+        <div class="tray">10:00 AM</div>
     </div>
 
-    <button id="open-btn">MỞ CỬA SỔ MỚI</button>
-
     <script>
-        // --- Cửa sổ popup di chuyển toàn màn hình (giống theannoyingsite) ---
-        let windowCount = 0;
+        // --- Danh sách tiêu đề cửa sổ ngẫu nhiên ---
+        const titles = [
+            "Thông báo", "Cảnh báo", "Lỗi hệ thống", "Virus đã phát hiện",
+            "Không thể thoát", "Bạn đã bị theo dõi", "Mật khẩu sai",
+            "Kết nối thất bại", "Cập nhật virus", "Tường lửa chặn"
+        ];
+
+        // --- Tạo cửa sổ popup kiểu Windows ---
+        let popupCount = 0;
         const popups = [];
+        let zIndexCounter = 500;
 
         function createPopup() {
-            const w = Math.floor(Math.random() * 120) + 60;  // 60-180px
-            const h = Math.floor(Math.random() * 120) + 60;
-            let left = Math.random() * (window.innerWidth - w);
-            let top = Math.random() * (window.innerHeight - h);
+            const w = Math.floor(Math.random() * 180) + 120;
+            const h = Math.floor(Math.random() * 160) + 100;
+            let left = Math.random() * (window.innerWidth - w - 20);
+            let top = Math.random() * (window.innerHeight - h - 60);
+            if (left < 0) left = 0;
+            if (top < 0) top = 0;
 
             const div = document.createElement('div');
             div.className = 'window-popup';
@@ -187,36 +248,50 @@
             div.style.height = h + 'px';
             div.style.left = left + 'px';
             div.style.top = top + 'px';
+            div.style.zIndex = zIndexCounter++;
 
-            const num = Math.floor(Math.random() * 999999) + 1;
-            const numSpan = document.createElement('span');
-            numSpan.className = 'number';
-            numSpan.textContent = num;
-            div.appendChild(numSpan);
+            // Title bar
+            const titleBar = document.createElement('div');
+            titleBar.className = 'title-bar';
+            const titleSpan = document.createElement('span');
+            titleSpan.className = 'title';
+            titleSpan.innerHTML = `<span class="icon"></span> ${titles[Math.floor(Math.random() * titles.length)]}`;
+            titleBar.appendChild(titleSpan);
 
-            // Nút đóng giả
-            const closeFake = document.createElement('span');
-            closeFake.className = 'fake-close';
-            closeFake.textContent = '✕';
-            closeFake.onclick = function(e) {
+            const controls = document.createElement('div');
+            controls.className = 'controls';
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'close-btn';
+            closeBtn.textContent = '✕';
+            closeBtn.onclick = function(e) {
                 e.stopPropagation();
-                // Không đóng, chỉ đổi số
-                numSpan.textContent = Math.floor(Math.random() * 999999) + 1;
+                // Không đóng thật, chỉ đổi nội dung
+                contentSpan.textContent = Math.floor(Math.random() * 999999) + 1;
             };
-            div.appendChild(closeFake);
+            controls.appendChild(closeBtn);
+            titleBar.appendChild(controls);
+            div.appendChild(titleBar);
+
+            // Content
+            const content = document.createElement('div');
+            content.className = 'content';
+            const contentSpan = document.createElement('span');
+            contentSpan.className = 'number';
+            contentSpan.textContent = Math.floor(Math.random() * 999999) + 1;
+            content.appendChild(contentSpan);
+            div.appendChild(content);
 
             document.body.appendChild(div);
             popups.push(div);
-            windowCount++;
+            popupCount++;
 
-            // Chuyển động
-            let speedX = (Math.random() - 0.5) * 4;
-            let speedY = (Math.random() - 0.5) * 4;
-            // Đổi hướng ngẫu nhiên
+            // --- Di chuyển toàn màn hình ---
+            let speedX = (Math.random() - 0.5) * 3;
+            let speedY = (Math.random() - 0.5) * 3;
             setInterval(() => {
-                speedX = (Math.random() - 0.5) * 5;
-                speedY = (Math.random() - 0.5) * 5;
-            }, 1500 + Math.random() * 3000);
+                speedX = (Math.random() - 0.5) * 4;
+                speedY = (Math.random() - 0.5) * 4;
+            }, 2000 + Math.random() * 3000);
 
             function movePopup() {
                 if (!div.parentNode) return;
@@ -231,7 +306,7 @@
                 if (left <= 0) { left = 0; speedX = -speedX; }
                 if (top <= 0) { top = 0; speedY = -speedY; }
                 if (left >= window.innerWidth - w) { left = window.innerWidth - w; speedX = -speedX; }
-                if (top >= window.innerHeight - h) { top = window.innerHeight - h; speedY = -speedY; }
+                if (top >= window.innerHeight - h - 60) { top = window.innerHeight - h - 60; speedY = -speedY; }
 
                 div.style.left = left + 'px';
                 div.style.top = top + 'px';
@@ -241,19 +316,24 @@
             // Tự động đổi số
             setInterval(() => {
                 if (div.parentNode) {
-                    numSpan.textContent = Math.floor(Math.random() * 999999) + 1;
+                    contentSpan.textContent = Math.floor(Math.random() * 999999) + 1;
                 }
-            }, 500 + Math.random() * 1500);
+            }, 1000 + Math.random() * 2000);
+
+            // Click vào cửa sổ => đưa lên đầu
+            div.addEventListener('mousedown', () => {
+                div.style.zIndex = zIndexCounter++;
+            });
         }
 
-        // --- Chữ di chuyển khắp màn hình ---
-        function createMovingText() {
+        // --- Chữ trôi nổi ---
+        function createFloatingText() {
             const div = document.createElement('div');
-            div.className = 'moving-text';
-            div.textContent = '⚠️ BẠN KHÔNG THỂ THOÁT ⚠️';
+            div.className = 'floating-text';
+            div.textContent = Math.random() < 0.5 ? '⚠️ BẠN KHÔNG THỂ THOÁT ⚠️' : '🔴 VIRUS ĐÃ KÍCH HOẠT 🔴';
             div.style.left = Math.random() * 80 + '%';
             div.style.top = Math.random() * 80 + '%';
-            div.style.fontSize = (Math.random() * 20 + 10) + 'px';
+            div.style.fontSize = (Math.random() * 20 + 12) + 'px';
             div.style.animationDuration = (Math.random() * 6 + 4) + 's';
             document.body.appendChild(div);
         }
@@ -269,46 +349,44 @@
         }
 
         // --- Khởi tạo ---
-        // Tạo 30 cửa sổ ban đầu
-        for (let i = 0; i < 30; i++) {
-            setTimeout(() => createPopup(), i * 150);
-        }
-        // Tạo 20 dòng chữ di chuyển
+        // Tạo 20 cửa sổ Windows
         for (let i = 0; i < 20; i++) {
-            createMovingText();
+            setTimeout(() => createPopup(), i * 200);
+        }
+        // Tạo 15 chữ trôi nổi
+        for (let i = 0; i < 15; i++) {
+            createFloatingText();
         }
 
-        // Nút mở thêm cửa sổ
-        document.getElementById('open-btn').addEventListener('click', () => {
-            for (let i = 0; i < 5; i++) {
-                setTimeout(() => createPopup(), i * 100);
+        // Nút Start
+        document.getElementById('start-btn').addEventListener('click', () => {
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => createPopup(), i * 150);
             }
-            // Cơ hội jumpscare
             if (Math.random() < 0.3) triggerJumpscare();
         });
 
         // Click bất kỳ => jumpscare
         document.addEventListener('click', triggerJumpscare);
 
-        // Di chuột có thể kích hoạt jumpscare
+        // Di chuột => cơ hội jumpscare
         document.addEventListener('mousemove', (e) => {
             if (Math.random() < 0.02) triggerJumpscare();
         });
 
-        // Tự động thêm cửa sổ mỗi 2 giây
+        // Tự động thêm cửa sổ mỗi 1.5 giây
         setInterval(() => {
             createPopup();
-            // Giới hạn số cửa sổ (xóa bớt nếu quá nhiều)
-            if (popups.length > 100) {
+            if (popups.length > 80) {
                 const old = popups.shift();
                 if (old && old.parentNode) old.remove();
             }
-        }, 2000);
+        }, 1500);
 
-        // Tự động thêm chữ mới mỗi 5 giây
+        // Tự động thêm chữ mỗi 4 giây
         setInterval(() => {
-            createMovingText();
-        }, 5000);
+            createFloatingText();
+        }, 4000);
 
         console.log('Trang web đã sẵn sàng!');
     </script>
