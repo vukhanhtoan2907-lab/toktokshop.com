@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>🎹 Server Script Piano — Roblox</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+  
+  body {
+    font-family: 'Outfit', sans-serif;
+    background-color: #0b0b0f;
+    color: #fff;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* --- CON TRỎ CHUỘT --- */
+  .cursor-dot {
+    position: fixed; top: 0; left: 0; width: 8px; height: 8px;
+    background: #00ffff; border-radius: 50%; pointer-events: none; z-index: 99999;
+    transform: translate(-50%, -50%); box-shadow: 0 0 15px #00ffff, 0 0 30px #00ffff;
+    transition: width 0.2s, height 0.2s, background 0.2s;
+  }
+  .cursor-outline {
+    position: fixed; top: 0; left: 0; width: 40px; height: 40px;
+    border: 2px solid rgba(255, 107, 157, 0.5); border-radius: 50%; pointer-events: none; z-index: 99998;
+    transform: translate(-50%, -50%); transition: transform 0.1s ease-out, width 0.2s, height 0.2s, border-color 0.2s;
+  }
+  .cursor-dot.hovering { width: 15px; height: 15px; background: #ff6b9d; box-shadow: 0 0 20px #ff6b9d, 0 0 40px #ff6b9d; }
+  .cursor-outline.hovering { width: 60px; height: 60px; border-color: #ff6b9d; background: rgba(255, 107, 157, 0.1); }
+
+  .ripple-effect {
+    position: fixed; border-radius: 50%; background: rgba(255, 255, 255, 0.4);
+    transform: translate(-50%, -50%) scale(0);
+    animation: rippleAnim 0.6s ease-out forwards; pointer-events: none; z-index: 99997;
+  }
+  @keyframes rippleAnim { to { transform: translate(-50%, -50%) scale(4); opacity: 0; } }
+
+  /* --- MÀN HÌNH CHỜ --- */
+  #intro-screen {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: #05030a; display: flex; flex-direction: column; justify-content: center; align-items: center;
+    z-index: 99990; cursor: none;
+    transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1), transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  #intro-screen.fade-out { opacity: 0; transform: scale(1.1); pointer-events: none; }
+  .intro-bg {
+    position: absolute; width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0,0,0,1) 20%, rgba(138, 43, 226, 0.3) 50%, transparent 70%);
+    border-radius: 50%; filter: blur(20px); animation: pulseIntro 4s infinite alternate;
+  }
+  @keyframes pulseIntro { 0% { transform: scale(0.9); opacity: 0.7; } 100% { transform: scale(1.1); opacity: 1; } }
+  .intro-text {
+    position: relative; font-size: 32px; font-weight: 600; color: #fff; letter-spacing: 2px; z-index: 2;
+    animation: textPulse 2s infinite alternate; text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+  }
+  @keyframes textPulse { 0% { opacity: 0.5; } 100% { opacity: 1; text-shadow: 0 0 30px rgba(255,255,255,0.8); } }
+
+  .bg-particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: hidden; }
+  .particle { position: absolute; background: rgba(255, 107, 157, 0.4); border-radius: 50%; animation: floatUp 10s linear infinite; box-shadow: 0 0 15px rgba(255, 107, 157, 0.8); }
+  @keyframes floatUp { 0% { transform: translateY(100vh) scale(0); opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { transform: translateY(-10vh) scale(1.5); opacity: 0; } }
+
+  header { position: fixed; top: 0; width: 100%; padding: 20px 50px; display: flex; justify-content: space-between; align-items: center; z-index: 100; background: linear-gradient(180deg, rgba(11,11,15,0.9) 0%, rgba(11,11,15,0) 100%); transition: background 0.3s; }
+  header.scrolled { background: rgba(11,11,15,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .logo { font-size: 24px; font-weight: 800; letter-spacing: 2px; display: flex; align-items: center; gap: 10px; text-transform: uppercase; z-index: 101; cursor: none; }
+  .logo-icon { color: #ff6b9d; font-size: 28px; filter: drop-shadow(0 0 10px #ff6b9d); animation: bounce 2s infinite; }
+  @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .nav-links { display: flex; gap: 25px; font-size: 15px; font-weight: 600; color: #b3b3b3; z-index: 101; }
+  .nav-links a { color: inherit; text-decoration: none; transition: color 0.3s; position: relative; cursor: none; }
+  .nav-links a:hover, .nav-links a.active { color: #fff; }
+  .nav-links a.active::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 100%; height: 2px; background: #ff6b9d; box-shadow: 0 0 10px #ff6b9d; border-radius: 2px; }
+
+  .page-section { display: none; min-height: 100vh; padding-top: 100px; padding-bottom: 120px; position: relative; z-index: 10; }
+  .page-section.active-page { display: block; animation: fadeIn 0.5s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  .hero { position: relative; height: 85vh; display: flex; align-items: center; padding: 0 80px; overflow: hidden; border-radius: 20px; margin: 0 20px; }
+  .hero-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 70% 50%, rgba(138, 43, 226, 0.4) 0%, transparent 60%), radial-gradient(circle at 30% 50%, rgba(255, 107, 157, 0.3) 0%, transparent 60%), url('https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat; opacity: 0.85; z-index: -1; }
+  .hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, #0b0b0f 0%, rgba(11,11,15,0.8) 45%, rgba(11,11,15,0.1) 100%), linear-gradient(0deg, #0b0b0f 0%, transparent 40%); z-index: -1; }
+  
+  .hero-content { position: relative; max-width: 600px; animation: slideUp 1s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 5; }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+  .badge-top { display: inline-block; background: linear-gradient(90deg, #ff6b9d, #8a2be2); color: #fff; padding: 6px 15px; border-radius: 6px; font-size: 13px; font-weight: 800; margin-bottom: 20px; letter-spacing: 1px; box-shadow: 0 0 15px rgba(255, 107, 157, 0.5); }
+  .hero-title { font-size: 65px; font-weight: 800; line-height: 1.1; margin-bottom: 20px; text-transform: uppercase; text-shadow: 0 4px 20px rgba(0,0,0,0.8); }
+  .hero-title span { background: linear-gradient(90deg, #ff6b9d, #c44dff, #00ffff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 15px rgba(196, 77, 255, 0.6)); }
+  .hero-desc { font-size: 18px; color: #e0e0e0; line-height: 1.6; margin-bottom: 35px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
+  
+  .hero-buttons { display: flex; gap: 20px; align-items: center; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; padding: 15px 35px; border-radius: 8px; font-size: 16px; font-weight: 800; text-decoration: none; transition: all 0.3s; cursor: none; border: none; text-transform: uppercase; letter-spacing: 1px; }
+  .btn-primary { background: linear-gradient(90deg, #ff6b9d, #c44dff); color: #fff; box-shadow: 0 0 25px rgba(255, 107, 157, 0.6); }
+  .btn-primary:hover { background: linear-gradient(90deg, #ff4d88, #b13de6); transform: scale(1.05); box-shadow: 0 0 40px rgba(255, 107, 157, 0.9); }
+  .btn svg { width: 20px; height: 20px; margin-right: 8px; fill: currentColor; }
+
+  .visualizer { position: absolute; right: 10%; top: 50%; transform: translateY(-50%); display: flex; gap: 8px; align-items: flex-end; height: 150px; z-index: 5; opacity: 0.8; }
+  .bar { width: 12px; background: linear-gradient(0deg, #ff6b9d, #8a2be2, #00ffff); border-radius: 10px 10px 0 0; animation: soundWave 1.2s ease-in-out infinite alternate; box-shadow: 0 0 15px rgba(138, 43, 226, 0.5); }
+  .bar:nth-child(1) { height: 30%; animation-delay: 0.1s; } .bar:nth-child(2) { height: 60%; animation-delay: 0.3s; }
+  .bar:nth-child(3) { height: 100%; animation-delay: 0.2s; } .bar:nth-child(4) { height: 80%; animation-delay: 0.5s; }
+  .bar:nth-child(5) { height: 40%; animation-delay: 0.4s; } .bar:nth-child(6) { height: 70%; animation-delay: 0.6s; }
+  .bar:nth-child(7) { height: 20%; animation-delay: 0.1s; }
+  @keyframes soundWave { 0% { transform: scaleY(0.4); opacity: 0.5; } 100% { transform: scaleY(1.1); opacity: 1; } }
+
+  .floating-note { position: absolute; color: rgba(255, 255, 255, 0.15); font-size: 80px; z-index: 2; animation: floatNote 6s ease-in-out infinite; filter: drop-shadow(0 0 20px rgba(255, 107, 157, 0.5)); }
+  .note-1 { top: 20%; right: 40%; animation-delay: 0s; font-size: 60px; }
+  .note-2 { top: 60%; right: 30%; animation-delay: 2s; font-size: 100px; }
+  .note-3 { top: 30%; right: 15%; animation-delay: 4s; font-size: 40px; }
+  @keyframes floatNote { 0%, 100% { transform: translateY(0) rotate(-10deg); } 50% { transform: translateY(-30px) rotate(15deg); } }
+
+  .section-container { padding: 0 50px; margin-bottom: 60px; position: relative; margin-top: -30px; }
+  .section-title { font-size: 24px; font-weight: 800; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; text-transform: uppercase; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+  .section-title::before { content: ''; display: block; width: 6px; height: 28px; background: linear-gradient(180deg, #ff6b9d, #8a2be2); border-radius: 4px; box-shadow: 0 0 10px #ff6b9d; }
+  
+  .carousel-wrapper { overflow: hidden; width: 100%; mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent); }
+  .carousel { display: flex; gap: 20px; width: max-content; animation: scrollX 25s linear infinite; padding: 10px 0; }
+  .carousel:hover { animation-play-state: paused; }
+  @keyframes scrollX { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  
+  .card-item { width: 320px; background: rgba(28, 28, 36, 0.8); backdrop-filter: blur(10px); border-radius: 16px; padding: 25px; border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+  .card-item:hover { transform: translateY(-10px); background: rgba(37, 37, 48, 0.95); border-color: rgba(255, 107, 157, 0.6); box-shadow: 0 15px 30px rgba(255, 107, 157, 0.2); }
+  .card-icon { width: 55px; height: 55px; border-radius: 12px; display: flex; justify-content: center; align-items: center; margin-bottom: 20px; font-size: 24px; }
+  .card-item h3 { font-size: 20px; margin-bottom: 10px; color: #fff; }
+  .card-item p { font-size: 15px; color: #aaa; line-height: 1.5; }
+
+  .content-box { background: rgba(28, 28, 36, 0.85); backdrop-filter: blur(15px); border-radius: 16px; padding: 35px; max-width: 800px; margin: 0 auto; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+  .content-box h2 { font-size: 28px; margin-bottom: 20px; color: #ff6b9d; text-transform: uppercase; }
+  .content-box p { font-size: 16px; color: #ccc; line-height: 1.6; margin-bottom: 15px; }
+  
+  .code-box { background: #0d0d12; border: 1px solid #333; border-radius: 10px; padding: 20px; font-family: monospace; font-size: 15px; color: #00ffaa; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; word-break: break-all; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
+  .btn-copy { background: #ff6b9d; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: none; font-weight: bold; transition: 0.3s; margin-left: 15px; flex-shrink: 0; box-shadow: 0 0 15px rgba(255, 107, 157, 0.4); }
+  .btn-copy:hover { background: #ff4d88; box-shadow: 0 0 25px rgba(255, 107, 157, 0.8); }
+
+  .btn-group { display: flex; gap: 10px; flex-shrink: 0; margin-left: 15px; }
+  .btn-copy.copied { background: #00ffaa; color: #0b0b0f; box-shadow: 0 0 25px rgba(0, 255, 170, 0.8); transform: scale(1.05); }
+
+  .faq-list { display: flex; flex-direction: column; gap: 12px; margin-top: 25px; }
+  .faq-item { background: rgba(20, 20, 28, 0.9); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; overflow: hidden; transition: all 0.3s; }
+  .faq-item:hover { border-color: rgba(255, 107, 157, 0.4); }
+  .faq-item.open { border-color: #ff6b9d; box-shadow: 0 0 20px rgba(255, 107, 157, 0.15); }
+  .faq-question { padding: 18px 22px; font-size: 16px; font-weight: 600; color: #fff; cursor: none; display: flex; justify-content: space-between; align-items: center; transition: background 0.3s; }
+  .faq-question:hover { background: rgba(255, 107, 157, 0.08); }
+  .faq-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; background: rgba(255, 107, 157, 0.15); border-radius: 50%; font-size: 14px; color: #ff6b9d; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); flex-shrink: 0; margin-left: 15px; }
+  .faq-item.open .faq-icon { transform: rotate(180deg); background: #ff6b9d; color: #fff; }
+  .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.3s ease; padding: 0 22px; color: #bbb; font-size: 15px; line-height: 1.6; }
+  .faq-item.open .faq-answer { max-height: 300px; padding: 0 22px 20px 22px; }
+  .faq-answer code { background: #0d0d12; color: #00ffaa; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 14px; }
+
+  .hack-grid { display: grid; grid-template-columns: 1fr; gap: 25px; margin-top: 30px; }
+  .hack-card { background: rgba(20, 20, 28, 0.9); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; transition: 0.3s; }
+  .hack-card:hover { border-color: rgba(255, 107, 157, 0.5); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  .hack-thumb { height: 180px; background-size: cover; background-position: center; position: relative; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+  .hack-tag { position: absolute; top: 15px; left: 15px; background: #00ffff; color: #0b0b0f; font-weight: 800; font-size: 14px; padding: 6px 15px; border-radius: 6px; box-shadow: 0 0 15px rgba(0, 255, 255, 0.5); letter-spacing: 1px; text-transform: uppercase; }
+  .hack-info { padding: 25px; }
+  .hack-info h3 { font-size: 22px; color: #fff; margin-bottom: 8px; }
+  .hack-info p { font-size: 15px; color: #aaa; margin-bottom: 20px; }
+
+  @media (min-width: 768px) {
+    .hack-card { flex-direction: row; }
+    .hack-thumb { width: 35%; height: auto; border-bottom: none; border-right: 1px solid rgba(255, 255, 255, 0.05); }
+    .hack-info { width: 65%; display: flex; flex-direction: column; justify-content: center; }
+  }
+
+  /* --- BANNER AI FREE --- */
+  .ai-event-banner { max-width: 700px; margin: 40px auto 0; padding: 30px; background: rgba(20, 20, 28, 0.9); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; text-align: center; }
+  .ai-event-title { font-size: 22px; font-weight: 800; text-transform: uppercase; line-height: 1.3; margin-bottom: 15px; color: #fff; }
+  .ai-event-title span { color: #00ffaa; }
+  .ai-event-desc { font-size: 15px; color: #ccc; line-height: 1.6; margin-bottom: 0; }
+  .ai-event-desc b { color: #fff; }
+
+  .community-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto; }
+  .community-card { background: linear-gradient(135deg, rgba(255, 107, 157, 0.1), rgba(138, 43, 226, 0.1)); border: 1px solid rgba(255, 107, 157, 0.3); border-radius: 16px; padding: 30px; text-align: center; transition: 0.3s; backdrop-filter: blur(10px); }
+  .community-card:hover { transform: translateY(-8px); border-color: #ff6b9d; box-shadow: 0 15px 30px rgba(255, 107, 157, 0.2); background: linear-gradient(135deg, rgba(255, 107, 157, 0.2), rgba(138, 43, 226, 0.2)); }
+  .community-card h3 { font-size: 22px; margin-bottom: 15px; color: #fff; }
+  .community-card p { font-size: 15px; color: #ccc; }
+
+  .bottom-player {
+    position: fixed; bottom: 0; left: 0; width: 100%;
+    background: rgba(11, 11, 15, 0.85); backdrop-filter: blur(15px);
+    border-top: 1px solid rgba(255, 255, 255, 0.05); padding: 15px 30px;
+    display: flex; justify-content: center; align-items: center; z-index: 1000;
+    transform: translateY(100%); transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .bottom-player.show { transform: translateY(0); }
+
+  .player-inner { width: 100%; max-width: 600px; display: flex; align-items: center; gap: 15px; }
+
+  .music-player-container {
+    position: relative;
+    width: 52px; 
+    height: 52px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+  }
+
+  .music-cover {
+    width: 100%; height: 100%; border-radius: 50%;
+    background: url('https://i.ytimg.com/vi/2C-soKZvOdk/hqdefault.jpg') center/cover;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .music-cover::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px; height: 8px;
+    background: #0b0b0f;
+    border-radius: 50%;
+    box-shadow: inset 0 0 5px rgba(0,0,0,1);
+    z-index: 2;
+  }
+
+  .tonearm {
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    width: 40px; 
+    height: 40px;
+    pointer-events: none;
+    z-index: 3;
+    transform-origin: 85% 15%;
+    transform: rotate(-45deg);
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .tonearm::before {
+    content: '';
+    position: absolute;
+    top: 2px; 
+    left: 14px;
+    width: 5px; 
+    height: 35px;
+    background: linear-gradient(90deg, #999, #fff, #999);
+    border-radius: 4px;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.6);
+  }
+
+  .tonearm::after {
+    content: '';
+    position: absolute;
+    bottom: 2px; 
+    left: 10px;
+    width: 13px; 
+    height: 9px;
+    background: #222;
+    border-radius: 3px;
+    border-bottom: 2px solid #aaa;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.9);
+  }
+
+  .music-cover.spinning {
+    animation: spinDisc 3s linear infinite;
+  }
+  @keyframes spinDisc {
+    100% { transform: rotate(360deg); }
+  }
+
+  .music-player-container.playing .tonearm {
+    transform: rotate(-10deg); 
+  }
+  
+  .music-info { display: flex; flex-direction: column; flex: 1; }
+  .music-title { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+  .music-progress { display: flex; align-items: center; gap: 10px; font-size: 11px; color: #aaa; }
+  
+  .progress-bar-bg { flex: 1; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; position: relative; cursor: none; }
+  .progress-bar-fill { position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: #fff; border-radius: 2px; pointer-events: none; }
+  
+  .music-controls { display: flex; align-items: center; gap: 15px; }
+  .control-btn { background: none; border: none; color: #fff; font-size: 16px; cursor: none; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
+  .control-btn:hover { color: #ff6b9d; transform: scale(1.1); }
+  .play-btn { font-size: 22px; }
+
+  #yt-player { position: absolute; width: 1px; height: 1px; opacity: 0.01; pointer-events: none; left: -9999px; top: -9999px; }
+
+  /* === ẨN CON TRỎ CHUỘT TRÊN MỌI THIẾT BỊ CẢM ỨNG === */
+  @media (pointer: coarse), (max-width: 768px) {
+    .cursor-dot, .cursor-outline, .ripple-effect { 
+      display: none !important; 
+    }
+    * { 
+      cursor: auto !important; 
+    }
+  }
+
+  @media (max-width: 900px) { .visualizer, .floating-note { display: none; } }
+  @media (max-width: 768px) {
+    header { padding: 15px 20px; flex-direction: column; gap: 15px; }
+    .hero-title { font-size: 40px; }
+    .hero-desc { font-size: 15px; }
+    .hero { padding: 0 20px; }
+    .section-container { padding: 0 20px; }
+    .intro-text { font-size: 24px; }
+    .bottom-player { padding: 10px 15px; }
+    .code-box { flex-direction: column; gap: 15px; }
+    .btn-group { margin-left: 0; width: 100%; }
+    .btn-group button { flex: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor-dot" id="cursor-dot"></div>
+<div class="cursor-outline" id="cursor-outline"></div>
+
+<div id="intro-screen">
+  <div class="intro-bg"></div>
+  <div class="intro-text">click to enter...</div>
+</div>
+
+<div class="bg-particles" id="particles"></div>
+
+<header id="navbar">
+  <div class="logo" onclick="switchTab('home')"><span class="logo-icon">🎹</span> Piano Roblox</div>
+  <div class="nav-links">
+    <a onclick="switchTab('home')" id="nav-home" class="active">Trang chủ</a>
+    <a onclick="switchTab('script')" id="nav-script">Script Piano</a>
+    <a onclick="switchTab('hack')" id="nav-hack">Script Khác</a>
+    <a onclick="switchTab('guide')" id="nav-guide">Hướng dẫn</a>
+    <a onclick="switchTab('faq')" id="nav-faq">FAQ</a>
+    <a onclick="switchTab('community')" id="nav-community">Cộng đồng</a>
+  </div>
+</header>
+
+<div id="page-home" class="page-section active-page">
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    
+    <div class="floating-note note-1">🎵</div>
+    <div class="floating-note note-2">🎶</div>
+    <div class="floating-note note-3">🎼</div>
+    
+    <div class="visualizer">
+      <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+      <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    </div>
+
+    <div class="hero-content">
+      <div class="badge-top">MIỄN PHÍ 100% - KHÔNG KEY</div>
+      <h1 class="hero-title">SERVER SCRIPT<br><span>PIANO ROBLOX</span></h1>
+      <p class="hero-desc">
+        Trải nghiệm chơi nhạc chuyên nghiệp trong Roblox. Kho script chất lượng, tự động chơi mọi bản nhạc hot trend, cập nhật liên tục và hoàn toàn miễn phí dành cho cộng đồng.
+      </p>
+      <div class="hero-buttons">
+        <a href="https://discord.gg/uynrfmcNmy" target="_blank" class="btn btn-primary">
+          <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg> Tham gia Discord
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-container">
+    <div class="section-title">Tính năng nổi bật</div>
+    <div class="carousel-wrapper">
+      <div class="carousel">
+        <div class="card-item">
+          <div class="card-icon" style="background: rgba(255, 107, 157, 0.1); color: #ff6b9d;"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg></div>
+          <h3>Chất lượng tuyệt đối</h3><p>Script được kiểm duyệt kỹ lưỡng, không lỗi, không lag.</p>
+        </div>
+        <div class="card-item">
+          <div class="card-icon" style="background: rgba(196, 77, 255, 0.1); color: #c44dff;"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H8v-4h4v4zm0-6H8V7h4v4zm6 6h-4v-4h4v4zm0-6h-4V7h4v4z"/></svg></div>
+          <h3>Kho nhạc khổng lồ</h3><p>Hàng ngàn bản nhạc hot trend, nhạc Việt, US-UK...</p>
+        </div>
+        <div class="card-item">
+          <div class="card-icon" style="background: rgba(0, 255, 255, 0.1); color: #00ffff;"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M21.58 16.09l-1.09-7.66C20.21 6.46 18.52 5 16.53 5H7.47C5.48 5 3.79 6.46 3.51 8.43l-1.09 7.66C2.2 17.63 3.39 19 4.94 19c.68 0 1.32-.27 1.8-.75L9 16h6l2.25 2.25c.48.48 1.13.75 1.8.75 1.56 0 2.75-1.37 2.53-2.91zM11 11H9v2H8v-2H6v-1h2V8h1v2h2v1zm4-1c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm2 3c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/></svg></div>
+          <h3>Tự động & Tùy chỉnh</h3><p>Hỗ trợ Auto-play thông minh, dễ dàng tùy chỉnh.</p>
+        </div>
+        <div class="card-item">
+          <div class="card-icon" style="background: rgba(0, 255, 170, 0.1); color: #00ffaa;"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+          <h3>Cộng đồng sôi động</h3><p>Nơi giao lưu, chia sẻ kinh nghiệm cùng mọi người.</p>
+        </div>
+        <div class="card-item">
+          <div class="card-icon" style="background: rgba(255, 107, 157, 0.1); color: #ff6b9d;"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg></div>
+          <h3>Chất lượng tuyệt đối</h3><p>Script được kiểm duyệt kỹ lưỡng, không lỗi, không lag.</p>
+        </div>
+        <div class="card-item">
+          <div class="card-icon" style="background: rgba(196, 77, 255, 0.1); color: #c44dff;"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H8v-4h4v4zm0-6H8V7h4v4zm6 6h-4v-4h4v4zm0-6h-4V7h4v4z"/></svg></div>
+          <h3>Kho nhạc khổng lồ</h3><p>Hàng ngàn bản nhạc hot trend, nhạc Việt, US-UK...</p>
+        </div>
+        <div class="card-item">
+          <div class="card-icon" style="background: rgba(0, 255, 255, 0.1); color: #00ffff;"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M21.58 16.09l-1.09-7.66C20.21 6.46 18.52 5 16.53 5H7.47C5.48 5 3.79 6.46 3.51 8.43l-1.09 7.66C2.2 17.63 3.39 19 4.94 19c.68 0 1.32-.27 1.8-.75L9 16h6l2.25 2.25c.48.48 1.13.75 1.8.75 1.56 0 2.75-1.37 2.53-2.91zM11 11H9v2H8v-2H6v-1h2V8h1v2h2v1zm4-1c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm2 3c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/></svg></div>
+          <h3>Tự động & Tùy chỉnh</h3><p>Hỗ trợ Auto-play thông minh, dễ dàng tùy chỉnh.</p>
+        </div>
+        <div class="card-item">
+          <div class="card-icon" style="background: rgba(0, 255, 170, 0.1); color: #00ffaa;"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+          <h3>Cộng đồng sôi động</h3><p>Nơi giao lưu, chia sẻ kinh nghiệm cùng mọi người.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="page-script" class="page-section">
+  <div class="content-box">
+    <h2>📜 Script Piano</h2>
+    <p>Để sử dụng, bạn cần cài đặt các phần mềm hỗ trợ (Executor) như <b>Delta</b>, <b>Solara</b>, v.v.</p>
+    <p>Sau khi cài đặt và mở Roblox, hãy copy đoạn Script dưới đây và dán vào Executor để lấy toàn bộ kho nhạc:</p>
+    
+    <div class="code-box">
+      <span id="script-text">loadstring(game:HttpGet("https://gist.githubusercontent.com/vukhanhtoan2907-lab/705658996e60d919a22cdc5dc0ce90d9/raw/gistfile1.txt"))()</span>
+      <div class="btn-group">
+        <button class="btn-copy" id="copyBtn" onclick="copyScript()">Copy</button>
+      </div>
+    </div>
+    <p style="font-size: 13px; color: #ff6b9d;">*Lưu ý: Hãy chắc chắn bạn đã tải đúng phiên bản Executor mới nhất để tránh bị lỗi.</p>
+  </div>
+</div>
+
+<div id="page-hack" class="page-section">
+  <div class="content-box" style="max-width: 900px;">
+    <h2>💀 Kho Script Khác</h2>
+    
+    <div class="hack-grid">
+      
+      <!-- Đã đổi thành HITBOX và sửa lại mô tả -->
+      <div class="hack-card">
+        <div class="hack-thumb" style="background: linear-gradient(135deg, #2a2a35, #0b0b0f);">
+           <div class="hack-tag" style="background: #00ffff; box-shadow: 0 0 15px #00ffff;">HITBOX</div>
+        </div>
+        <div class="hack-info">
+          <h3>HITBOX Script</h3>
+          <p>Script giúp tăng vùng hitbox của người khác.</p>
+          <div class="code-box" style="margin-bottom: 0; padding: 15px;">
+            <span id="hack-hitbox-text" style="font-size: 13px;">loadstring(game:HttpGet("https://gist.githubusercontent.com/vukhanhtoan2907-lab/0f49841a47c344b44c1f1d30a653e34a/raw/gistfile1.txt"))()</span>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copySpecificScript('hack-hitbox-text', this)" style="padding: 8px 15px;">Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Script thứ 2 (AMBOT) giữ nguyên -->
+      <div class="hack-card">
+        <div class="hack-thumb" style="background: linear-gradient(135deg, #1e1e2f, #0b0b0f);">
+           <div class="hack-tag" style="background: #c44dff; box-shadow: 0 0 15px #c44dff;">AMBOT</div>
+        </div>
+        <div class="hack-info">
+          <h3>AMBOT Tổng Hợp (Demo)</h3>
+          <p>Script AMBOT phiên bản demo, tốc độ và ổn định.</p>
+          <div class="code-box" style="margin-bottom: 0; padding: 15px;">
+            <span id="hack-ambot-text" style="font-size: 13px;">loadstring(game:HttpGet("https://gist.githubusercontent.com/vukhanhtoan2907-lab/475dc86eb710dc796368af5a8e22df18/raw/gistfile1.txt"))()</span>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copySpecificScript('hack-ambot-text', this)" style="padding: 8px 15px;">Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="page-guide" class="page-section">
+  <div class="content-box">
+    <h2>📖 Hướng Dẫn Cài Đặt</h2>
+    <p><b>Bước 1:</b> Tải và cài đặt phần mềm Executor (Delta hoặc Solara) trên thiết bị của bạn.</p>
+    <p><b>Bước 2:</b> Mở Roblox, vào game bất kỳ có chức năng chơi nhạc (ví dụ: Piano, Blackout, v.v.).</p>
+    <p><b>Bước 3:</b> Mở Executor, copy đoạn Script ở mục <b>Script</b> và dán vào ô trống.</p>
+    <p><b>Bước 4:</b> Nhấn nút <b>Execute / Inject</b> và đợi menu hiện lên. Chọn bài hát và tận hưởng!</p>
+  </div>
+</div>
+
+<div id="page-faq" class="page-section">
+  <div class="content-box">
+    <h2>❓ Câu Hỏi Thường Gặp</h2>
+    <p>Dưới đây là các <b>lỗi thường gặp</b> và <b>cách khắc phục</b> nhanh nhất. Bấm vào từng câu hỏi để xem chi tiết.</p>
+
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <span>🔴 HttpGet is not a valid member</span>
+          <span class="faq-icon">▼</span>
+        </div>
+        <div class="faq-answer">
+          Executor chưa inject xong. Đợi thông báo <b>Injected</b> rồi execute lại.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <span>🔴 attempt to call a nil value</span>
+          <span class="faq-icon">▼</span>
+        </div>
+        <div class="faq-answer">
+          Loadstring bị copy thiếu. Copy lại nguyên vẹn cả dòng, đặc biệt là hai dấu ngoặc <code>()</code> ở cuối.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <span>🔴 Không hiện giao diện</span>
+          <span class="faq-icon">▼</span>
+        </div>
+        <div class="faq-answer">
+          Nhấn phím <code>Insert</code>. Nếu vẫn không được thì thoát game, vào lại rồi chạy script lần nữa.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <span>🔴 Bấm Play nhưng không ra tiếng</span>
+          <span class="faq-icon">▼</span>
+        </div>
+        <div class="faq-answer">
+          Bạn chưa ngồi vào đàn, hoặc đang ở sai game. Ngồi vào ghế piano trước đã.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <span>🔴 Chơi sai nốt, lệch nhịp</span>
+          <span class="faq-icon">▼</span>
+        </div>
+        <div class="faq-answer">
+          Giảm <b>Tempo</b> và kiểm tra chế độ <b>61 hay 88 phím</b> cho khớp với đàn trong game.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <span>🔴 Bị đá khỏi game</span>
+          <span class="faq-icon">▼</span>
+        </div>
+        <div class="faq-answer">
+          Giảm tốc độ chơi, tránh sheet quá nặng. Một số game có hệ thống chống gian lận chặt.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="page-community" class="page-section">
+  <div class="content-box" style="text-align: center; margin-bottom: 30px;">
+    <h2>🤝 Cộng Đồng Piano Roblox</h2>
+    <p>Nơi hội tụ những người yêu âm nhạc, với không gian <b>hài hòa, thân thiện</b> và luôn sẵn sàng giúp đỡ lẫn nhau.</p>
+  </div>
+  
+  <div class="community-grid">
+    <div class="community-card"><h3>💬 Giao Lưu</h3><p>Kết bạn, trò chuyện và tìm những người bạn cùng sở thích âm nhạc.</p></div>
+    <div class="community-card"><h3>🎵 Chia Sẻ Nhạc</h3><p>Gửi những bản nhạc hay, script mới nhất để mọi người cùng chơi.</p></div>
+    <div class="community-card"><h3>🛠️ Hỗ Trợ</h3><p>Giải đáp thắc mắc về cài đặt script, sửa lỗi Executor 24/7.</p></div>
+  </div>
+
+  <div class="ai-event-banner">
+    <h2 class="ai-event-title">TRỢ LÝ AI CAO CẤP <span>MIỄN PHÍ 1 TUẦN</span></h2>
+    <p class="ai-event-desc">
+      Mở cửa tự do cụm <b>Nagisa AI Cloud</b> cho anh em chiến code (Cursor, Cline, Claude Code). Không cần thẻ!
+    </p>
+  </div>
+</div>
+
+<div class="bottom-player" id="bottomPlayer">
+  <div class="player-inner">
+    <div class="music-player-container">
+      <div class="music-cover" id="musicDisc"></div>
+      <div class="tonearm"></div>
+    </div>
+    <div class="music-info">
+      <div class="music-title">Playlist Ngọt - Nhạc Ngọt làm ta say</div>
+      <div class="music-progress">
+        <span id="currentTime">0:00</span>
+        <div class="progress-bar-bg" id="progressBarBg">
+          <div class="progress-bar-fill" id="progressBarFill"></div>
+        </div>
+        <span id="duration">0:00</span>
+      </div>
+    </div>
+    <div class="music-controls">
+      <button class="control-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
+      <button class="control-btn play-btn" id="playPauseBtn" onclick="togglePlay()">
+        <svg id="playIcon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <button class="control-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<div id="yt-player"></div>
+
+<script>
+  const dot = document.getElementById('cursor-dot');
+  const outline = document.getElementById('cursor-outline');
+  let mouseX = 0, mouseY = 0, outlineX = 0, outlineY = 0;
+
+  document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX; mouseY = e.clientY;
+    dot.style.left = mouseX + 'px'; dot.style.top = mouseY + 'px';
+  });
+
+  function animateCursor() {
+    outlineX += (mouseX - outlineX) * 0.15;
+    outlineY += (mouseY - outlineY) * 0.15;
+    outline.style.left = outlineX + 'px'; outline.style.top = outlineY + 'px';
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+
+  document.querySelectorAll('a, button, .logo, .btn, .progress-bar-bg, .faq-question').forEach(el => {
+    el.addEventListener('mouseenter', () => { dot.classList.add('hovering'); outline.classList.add('hovering'); });
+    el.addEventListener('mouseleave', () => { dot.classList.remove('hovering'); outline.classList.remove('hovering'); });
+  });
+
+  document.addEventListener('click', (e) => {
+    if (window.innerWidth > 768) {
+      const ripple = document.createElement('div');
+      ripple.classList.add('ripple-effect');
+      ripple.style.left = e.clientX + 'px';
+      ripple.style.top = e.clientY + 'px';
+      const size = Math.random() * 20 + 20;
+      ripple.style.width = size + 'px'; ripple.style.height = size + 'px';
+      document.body.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 600);
+    }
+  });
+
+  var tag = document.createElement('script');
+  tag.src = "https://www.youtube.com/iframe_api";
+  var firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+  var player;
+  var isPlaying = false;
+  var playerReady = false;
+  var pendingPlay = false;
+  const musicDisc = document.getElementById('musicDisc');
+  const musicContainer = document.querySelector('.music-player-container');
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player('yt-player', {
+      height: '0', width: '0',
+      videoId: '2C-soKZvOdk',
+      playerVars: {
+        'autoplay': 1,
+        'mute': 0,
+        'controls': 0,
+        'loop': 1,
+        'playlist': '2C-soKZvOdk'
+      },
+      events: {
+        'onReady': onPlayerReady,
+        'onStateChange': onPlayerStateChange
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    playerReady = true;
+    setInterval(updateProgress, 500);
+    
+    if (pendingPlay) {
+      player.playVideo();
+      pendingPlay = false;
+    }
+  }
+
+  function onPlayerStateChange(event) {
+    if (event.data == YT.PlayerState.ENDED) player.playVideo();
+    
+    if (event.data == YT.PlayerState.PLAYING) {
+      isPlaying = true;
+      musicDisc.classList.add('spinning');
+      musicContainer.classList.add('playing');
+      playIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+    } else {
+      isPlaying = false;
+      musicDisc.classList.remove('spinning');
+      musicContainer.classList.remove('playing');
+      playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+    }
+  }
+
+  const introScreen = document.getElementById('intro-screen');
+  const bottomPlayer = document.getElementById('bottomPlayer');
+  const playIcon = document.getElementById('playIcon');
+
+  introScreen.addEventListener('click', () => {
+    introScreen.classList.add('fade-out');
+    bottomPlayer.classList.add('show');
+
+    if (player && playerReady && player.playVideo) {
+      player.playVideo();
+    } else {
+      pendingPlay = true;
+    }
+
+    setTimeout(() => { introScreen.style.display = 'none'; }, 1200);
+  });
+
+  function togglePlay() {
+    if (!player || !playerReady) return;
+    
+    if (isPlaying) {
+      player.pauseVideo();
+    } else {
+      player.playVideo();
+    }
+  }
+
+  const progressBarBg = document.getElementById('progressBarBg');
+  const progressBarFill = document.getElementById('progressBarFill');
+  const currentTimeText = document.getElementById('currentTime');
+  const durationText = document.getElementById('duration');
+
+  function updateProgress() {
+    if (player && player.getDuration) {
+      var duration = player.getDuration();
+      var current = player.getCurrentTime();
+      if (duration > 0) {
+        var percent = (current / duration) * 100;
+        progressBarFill.style.width = percent + '%';
+
+        let curM = Math.floor(current / 60);
+        let curS = Math.floor(current % 60);
+        if (curS < 10) curS = '0' + curS;
+        currentTimeText.innerText = curM + ':' + curS;
+
+        let durM = Math.floor(duration / 60);
+        let durS = Math.floor(duration % 60);
+        if (durS < 10) durS = '0' + durS;
+        durationText.innerText = durM + ':' + durS;
+      }
+    }
+  }
+
+  progressBarBg.addEventListener('click', (e) => {
+    if (player && player.getDuration) {
+      const rect = progressBarBg.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const percent = clickX / rect.width;
+      player.seekTo(percent * player.getDuration(), true);
+    }
+  });
+
+  function copyScript() {
+    const text = document.getElementById('script-text').innerText.trim();
+    const btn = document.getElementById('copyBtn');
+
+    navigator.clipboard.writeText(text).then(() => {
+      const originalText = btn.innerText;
+      btn.innerText = '✅ Đã copy!';
+      btn.classList.add('copied');
+
+      setTimeout(() => {
+        btn.innerText = originalText;
+        btn.classList.remove('copied');
+      }, 2000);
+    }).catch(err => {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+
+      const btn = document.getElementById('copyBtn');
+      btn.innerText = '✅ Đã copy!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.innerText = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
+  function copySpecificScript(elementId, btn) {
+    const text = document.getElementById(elementId).innerText.trim();
+    const originalText = btn.innerText;
+
+    navigator.clipboard.writeText(text).then(() => {
+      btn.innerText = '✅ Đã copy!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.innerText = originalText;
+        btn.classList.remove('copied');
+      }, 2000);
+    }).catch(err => {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      
+      btn.innerText = '✅ Đã copy!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.innerText = originalText;
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
+  function toggleFaq(questionEl) {
+    const item = questionEl.parentElement;
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('open'));
+    if (!isOpen) {
+      item.classList.add('open');
+    }
+  }
+
+  const particleContainer = document.getElementById('particles');
+  for (let i = 0; i < 40; i++) {
+    let p = document.createElement('div');
+    p.classList.add('particle');
+    let size = Math.random() * 6 + 2;
+    p.style.width = size + 'px'; p.style.height = size + 'px';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.animationDuration = (Math.random() * 5 + 5) + 's';
+    p.style.animationDelay = Math.random() * 5 + 's';
+    let colors = ['#ff6b9d', '#c44dff', '#00ffff', '#00ffaa'];
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.boxShadow = `0 0 15px ${p.style.background}`;
+    particleContainer.appendChild(p);
+  }
+
+  function switchTab(tabId) {
+    document.querySelectorAll('.page-section').forEach(page => page.classList.remove('active-page'));
+    document.getElementById('page-' + tabId).classList.add('active-page');
+    document.querySelectorAll('.nav-links a').forEach(link => link.classList.remove('active'));
+    document.getElementById('nav-' + tabId).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  window.addEventListener('scroll', () => {
+    const header = document.getElementById('navbar');
+    if (window.scrollY > 50) header.classList.add('scrolled');
+    else header.classList.remove('scrolled');
+  });
+</script>
+
+</body>
+</html>
