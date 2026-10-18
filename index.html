@@ -40,7 +40,7 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
 .hero-content{position:relative;max-width:700px;animation:slideUp 1s cubic-bezier(.175,.885,.32,1.275);z-index:5}
 @keyframes slideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
 .badge-top{display:inline-block;background:linear-gradient(90deg,#ff6b9d,#8a2be2);color:#fff;padding:6px 15px;border-radius:6px;font-size:13px;font-weight:800;margin-bottom:20px;letter-spacing:1px;box-shadow:0 0 15px rgba(255,107,157,.5)}
-.hero-title{font-size:65px;font-weight:800;line-height:1.1;margin-bottom:20px;text-transform:uppercase;text-shadow:0 4px 20px rgba(0,0,0,.8);font-family:'Outfit',sans-serif}
+.hero-title{font-size:65px;font-weight:800;line-height:1.1;margin-bottom:20px;text-transform:uppercase;text-shadow:0 4px 20px rgba(0,0,0,.8)}
 .hero-title span{background:linear-gradient(90deg,#ff6b9d,#c44dff,#00ffff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 15px rgba(196,77,255,.6))}
 .hero-desc{font-size:18px;color:#e0e0e0;line-height:1.6;margin-bottom:35px;text-shadow:0 2px 10px rgba(0,0,0,.8)}
 .hero-buttons { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 30px; }
@@ -80,7 +80,7 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
 .card-item h3{font-size:20px;margin-bottom:10px;color:#fff}
 .card-item p{font-size:15px;color:#aaa;line-height:1.5}
 .content-box{background:rgba(28,28,36,.85);backdrop-filter:blur(15px);border-radius:16px;padding:35px;max-width:800px;margin:0 auto;border:1px solid rgba(255,255,255,.1);box-shadow:0 20px 40px rgba(0,0,0,.5)}
-.content-box h2{font-size:28px;margin-bottom:20px;color:#ff6b9d;text-transform:uppercase;font-family:'Outfit',sans-serif}
+.content-box h2{font-size:28px;margin-bottom:20px;color:#ff6b9d;text-transform:uppercase}
 .content-box p{font-size:16px;color:#ccc;line-height:1.6;margin-bottom:15px}
 .code-box{background:#0d0d12;border:1px solid #333;border-radius:10px;padding:20px;font-family:monospace;font-size:15px;color:#00ffaa;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;word-break:break-all;box-shadow:inset 0 0 20px rgba(0,0,0,.8)}
 .btn-copy{background:#ff6b9d;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:none;font-weight:bold;transition:.3s;margin-left:15px;flex-shrink:0;box-shadow:0 0 15px rgba(255,107,157,.4)}
@@ -115,7 +115,7 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
 .hack-info p{font-size:15px;color:#aaa;margin-bottom:20px}
 @media(min-width:768px){.hack-card{flex-direction:row}.hack-thumb{width:35%;height:auto;border-bottom:none;border-right:1px solid rgba(255,255,255,.05)}.hack-info{width:65%;display:flex;flex-direction:column;justify-content:center}}
 .ai-event-banner{max-width:700px;margin:40px auto 0;padding:30px;background:rgba(20,20,28,.9);border:1px solid rgba(255,255,255,.1);border-radius:20px;text-align:center}
-.ai-event-title{font-size:22px;font-weight:800;text-transform:uppercase;line-height:1.3;margin-bottom:15px;color:#fff;font-family:'Outfit',sans-serif}
+.ai-event-title{font-size:22px;font-weight:800;text-transform:uppercase;line-height:1.3;margin-bottom:15px;color:#fff;}
 .ai-event-title span{color:#00ffaa}
 .ai-event-desc{font-size:15px;color:#ccc;line-height:1.6;margin-bottom:0}
 .ai-event-desc b{color:#fff}
@@ -146,51 +146,13 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
 .control-btn:hover{color:#ff6b9d;transform:scale(1.1)}
 .play-btn{font-size:22px}
 
-/* CSS TOOLS MIDI (IFRAME) */
-.midi-tool { background: #000; border-radius: 12px; margin-top: 20px; border: 1px solid #333; height: 80vh; overflow: hidden; display: none; flex-direction: column; }
-.midi-iframe { width: 100%; height: 100%; border: none; }
-
-/* CSS GIAO DIỆN MIDI EDITOR (PHONG CÁCH HIỆN ĐẠI, ĐỒNG BỘ) */
-.editor-container { width: 100%; max-width: 800px; margin: 0 auto; background: rgba(28, 28, 36, 0.8); backdrop-filter: blur(15px); padding: 30px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1); display: none; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-.editor-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 15px; }
-.editor-header h1 { font-size: 28px; font-weight: 800; color: #fff; text-transform: uppercase; }
-.editor-header h1 span { background: linear-gradient(90deg, #ff6b9d, #c44dff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.editor-header a { color: #aaa; text-decoration: none; font-size: 14px; font-weight: 600; transition: 0.3s; }
-.editor-header a:hover { color: #fff; }
-.editor-toolbar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
-.editor-btn { background: rgba(255, 255, 255, 0.05); color: #fff; border: 1px solid rgba(255, 255, 255, 0.15); padding: 10px 20px; border-radius: 50px; cursor: pointer; font-size: 14px; font-weight: 600; transition: 0.3s; }
-.editor-btn:hover { background: rgba(255, 255, 255, 0.15); border-color: #ff6b9d; box-shadow: 0 0 15px rgba(255, 107, 157, 0.3); }
-.editor-piano-roll { height: 300px; background-color: #0d0d12; background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 30px 30px; border-radius: 8px; position: relative; display: flex; justify-content: center; align-items: center; color: #555; font-size: 15px; margin-bottom: 20px; border: 1px solid #333; }
-.editor-footer { color: #666; font-size: 12px; text-align: center; }
-
-/* CSS GIAO DIỆN CHUYỂN ĐỔI MP3 (PHONG CÁCH DARK MODE ĐỒNG BỘ) */
-.b44-container { width: 100%; max-width: 560px; margin: 0 auto; background: rgba(28, 28, 36, 0.6); backdrop-filter: blur(10px); padding: 30px 20px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1); display: none; }
-.b44-header { text-align: center; margin-bottom: 20px; }
-.b44-logo { display: flex; justify-content: center; margin-bottom: 15px; }
-.b44-logo svg { width: 60px; height: 60px; color: #fff; filter: drop-shadow(0 0 15px rgba(255, 107, 157, 0.5)); }
-.b44-header h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; color: #fff; margin-bottom: 5px; text-transform: uppercase; }
-.b44-header h1 span { color: #ff6b9d; }
-.b44-header p { color: #aaa; font-size: 14px; margin-top: 6px; }
-.b44-dropzone { margin-top: 14px; border: 2px dashed rgba(255, 255, 255, 0.2); border-radius: 16px; padding: 40px 20px; text-align: center; transition: all .2s; cursor: pointer; background: rgba(0, 0, 0, 0.3); }
-.b44-dropzone:hover { border-color: #ff6b9d; background: rgba(255, 107, 157, 0.05); }
-.b44-dz-title { font-size: 18px; font-weight: 600; margin: 10px 0 6px; color: #fff; }
-.b44-btn { background: linear-gradient(90deg, #ff6b9d, #c44dff); color: #fff; border: none; padding: 14px 28px; border-radius: 99px; font-size: 15px; font-weight: 800; cursor: pointer; transition: all .15s; text-decoration: none; display: inline-block; width: 100%; margin-top: 16px; box-shadow: 0 0 20px rgba(255, 107, 157, 0.4); }
-.b44-btn:hover { transform: scale(1.02); box-shadow: 0 0 30px rgba(255, 107, 157, 0.8); }
-.b44-url-row { margin-top: 12px; }
-.b44-url-row input { width: 100%; background: #0d0d12; border: 1px solid #333; border-radius: 12px; color: #fff; padding: 13px 16px; font-size: 14px; outline: none; font-family: 'Outfit', sans-serif;}
-.b44-url-row input:focus { border-color: #ff6b9d; }
-.b44-footer { color: #666; font-size: 11px; padding: 20px 0 0 0; text-align: center; }
-.b44-hide { display: none !important; }
-.b44-verify-backdrop { position: fixed; inset: 0; z-index: 300; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; opacity: 1; visibility: visible; }
-.b44-verify-box { background: #141414; border: 1px solid #333; border-radius: 16px; padding: 40px 32px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8); }
-.b44-verify-title { font-size: 14px; font-weight: 700; letter-spacing: 2px; color: #aaa; margin-bottom: 32px; text-transform: uppercase; }
-.b44-verify-step { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-bottom: 10px; }
-.b44-verify-checkbox-label { display: flex; align-items: center; gap: 14px; cursor: pointer; user-select: none; }
-.b44-verify-checkbox { width: 24px; height: 24px; cursor: pointer; accent-color: #ff6b9d; }
-.b44-verify-checkbox-text { font-size: 16px; font-weight: 500; color: #fff; }
-.b44-verify-spinner { width: 50px; height: 50px; border: 3px solid #333; border-top-color: #ff6b9d; border-radius: 50%; animation: spinVerify 1s linear infinite; }
-@keyframes spinVerify { to { transform: rotate(360deg); } }
-.b44-verify-text { font-size: 16px; font-weight: 600; color: #ff6b9d; }
+/* CSS TOOLS MIDI (ĐANG PHÁT TRIỂN) */
+.dev-tool { display: none; text-align: center; padding: 60px 20px; background: rgba(28, 28, 36, 0.6); border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+.dev-icon { font-size: 60px; margin-bottom: 20px; animation: bounce 2s infinite; }
+.dev-title { font-size: 28px; font-weight: 800; color: #ff6b9d; margin-bottom: 15px; text-transform: uppercase; }
+.dev-desc { color: #aaa; font-size: 16px; max-width: 500px; margin: 0 auto 30px; line-height: 1.6; }
+.dev-btn { background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 12px 25px; border-radius: 50px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 15px; }
+.dev-btn:hover { background: rgba(255, 255, 255, 0.2); border-color: #ff6b9d; }
 
 #yt-player{position:absolute;width:1px;height:1px;opacity:.01;pointer-events:none;left:-9999px;top:-9999px}
 @media(pointer:coarse),(max-width:768px){.cursor-dot,.cursor-outline{display:none!important}*{cursor:auto!important}}
@@ -297,74 +259,28 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
     <h2>🎹 Công Cụ MIDI</h2>
     <p>Chọn công cụ bạn muốn sử dụng dưới đây.</p>
     
-    <!-- TOOL 1: PLAYER (ĐANG BẢO TRÌ) -->
-    <div id="tool-player" style="display: none; text-align: center; padding: 50px 20px; background: rgba(28, 28, 36, 0.6); border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1);">
-      <div style="font-size: 60px; margin-bottom: 20px;">🔧</div>
-      <h3 style="font-size: 24px; color: #ff6b9d; margin-bottom: 10px;">Đang Bảo Trì</h3>
-      <p style="color: #aaa; font-size: 16px;">Tính năng Trình phát MIDI đang được nâng cấp. Vui lòng quay lại sau!</p>
-      <button class="btn-glass" style="margin-top: 20px;" onclick="openTool('none')">Quay Lại</button>
+    <!-- TOOL 1: PLAYER (ĐANG PHÁT TRIỂN) -->
+    <div id="tool-player" class="dev-tool">
+      <div class="dev-icon">🚧</div>
+      <div class="dev-title">Đang Phát Triển</div>
+      <div class="dev-desc">Tính năng Trình phát MIDI hiện đang trong quá trình phát triển. Chưa rõ ngày phát hành chính thức.</div>
+      <button class="dev-btn" onclick="openTool('none')">Quay Lại</button>
     </div>
 
-    <!-- TOOL 2: EDITOR (PHONG CÁCH HIỆN ĐẠI) -->
-    <div id="tool-editor" class="editor-container">
-      <div class="editor-header">
-        <h1><span>MIDI</span> Editor</h1>
-        <a href="#" onclick="openTool('none')">← Quay lại</a>
-      </div>
-      <div class="editor-toolbar">
-        <button class="editor-btn" onclick="alert('Chức năng đang phát triển!')">Mở file MIDI</button>
-        <button class="editor-btn" onclick="alert('Chức năng đang phát triển!')">Phát</button>
-        <button class="editor-btn" onclick="alert('Chức năng đang phát triển!')">Dừng</button>
-        <button class="editor-btn" onclick="alert('Chức năng đang phát triển!')">Xuất file</button>
-      </div>
-      <div class="editor-piano-roll">
-        Kéo thả file MIDI vào đây để chỉnh sửa
-      </div>
-      <div class="editor-footer">Giao diện đồng bộ với Piano Roblox</div>
+    <!-- TOOL 2: EDITOR (ĐANG PHÁT TRIỂN) -->
+    <div id="tool-editor" class="dev-tool">
+      <div class="dev-icon">🚧</div>
+      <div class="dev-title">Đang Phát Triển</div>
+      <div class="dev-desc">Tính năng Chỉnh sửa MIDI hiện đang trong quá trình phát triển. Chưa rõ ngày phát hành chính thức.</div>
+      <button class="dev-btn" onclick="openTool('none')">Quay Lại</button>
     </div>
 
-    <!-- TOOL 3: CONVERTER (GIAO DIỆN BASE44 DARK MODE ĐỒNG BỘ + LOGO + FONT) -->
-    <div id="tool-converter" class="b44-container">
-      <div class="b44-header">
-        <div class="b44-logo">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-        </div>
-        <h1>teto<span>midi</span></h1>
-        <p>MP3 to MIDI Transcriber</p>
-      </div>
-
-      <div class="b44-dropzone" id="b44Dropzone" onclick="document.getElementById('b44File').click()">
-        <div class="b44-dz-title">Drop an audio file here</div>
-        <p style="color: #aaa; font-size: 14px;">or click to browse</p>
-        <input type="file" id="b44File" accept="audio/*" style="display: none;" onchange="b44SelectFile()">
-      </div>
-
-      <div class="b44-url-row">
-        <input type="text" placeholder="Or paste a SoundCloud link...">
-      </div>
-
-      <button class="b44-btn" id="b44TranscribeBtn" onclick="b44StartTranscribe()">Transcribe to MIDI</button>
-
-      <div class="b44-footer">
-        Powered by Base44 AI
-      </div>
-    </div>
-
-    <!-- VERIFICATION MODAL -->
-    <div id="b44VerifyModal" class="b44-verify-backdrop b44-hide">
-      <div class="b44-verify-box">
-        <div class="b44-verify-title">Human Verification</div>
-        <div class="b44-verify-step" id="b44VerifyStep1">
-          <label class="b44-verify-checkbox-label">
-            <input type="checkbox" class="b44-verify-checkbox" id="b44Checkbox" onchange="b44Verify()">
-            <span class="b44-verify-checkbox-text">I am not a robot</span>
-          </label>
-        </div>
-        <div class="b44-verify-step b44-hide" id="b44VerifyStep2">
-          <div class="b44-verify-spinner"></div>
-          <div class="b44-verify-text">Verifying...</div>
-        </div>
-      </div>
+    <!-- TOOL 3: CONVERTER (ĐANG PHÁT TRIỂN) -->
+    <div id="tool-converter" class="dev-tool">
+      <div class="dev-icon">🚧</div>
+      <div class="dev-title">Đang Phát Triển</div>
+      <div class="dev-desc">Tính năng Chuyển đổi MP3 sang MIDI hiện đang trong quá trình phát triển. Chưa rõ ngày phát hành chính thức.</div>
+      <button class="dev-btn" onclick="openTool('none')">Quay Lại</button>
     </div>
 
     <div id="tool-list">
@@ -587,7 +503,7 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
   }
   animateCursor();
 
-  document.querySelectorAll('a, button, .logo, .btn-glass, .tool-action, .faq-question').forEach(el => {
+  document.querySelectorAll('a, button, .logo, .btn-glass, .tool-action, .faq-question, .dev-btn').forEach(el => {
     el.addEventListener('mouseenter', () => { dot.classList.add('hovering'); outline.classList.add('hovering'); });
     el.addEventListener('mouseleave', () => { dot.classList.remove('hovering'); outline.classList.remove('hovering'); });
   });
@@ -742,39 +658,6 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
       document.getElementById('tool-editor').style.display = 'block';
     } else if (toolName === 'player') {
       document.getElementById('tool-player').style.display = 'block';
-    }
-  }
-
-  // --- XỬ LÝ GIAO DIỆN CHUYỂN MP3 SANG MIDI ---
-  function b44SelectFile() {
-    const fileInput = document.getElementById('b44File');
-    const dropzone = document.getElementById('b44Dropzone');
-    if (fileInput.files.length > 0) {
-      dropzone.querySelector('.b44-dz-title').innerText = "✅ Đã chọn: " + fileInput.files[0].name;
-      dropzone.style.borderColor = '#00ffaa';
-    }
-  }
-
-  function b44StartTranscribe() {
-    document.getElementById('b44VerifyModal').classList.remove('b44-hide');
-  }
-
-  function b44Verify() {
-    const checkbox = document.getElementById('b44Checkbox');
-    if (checkbox.checked) {
-      document.getElementById('b44VerifyStep1').classList.add('b44-hide');
-      document.getElementById('b44VerifyStep2').classList.remove('b44-hide');
-      
-      setTimeout(() => {
-        // Mở tab mới để xử lý AI thật
-        window.open('https://3000-6ac336009741c9914356f68c--b-33db25b-d4602d4d974ddd86.imported.base44-preview.app/', '_blank');
-        
-        // Reset lại UI
-        document.getElementById('b44VerifyModal').classList.add('b44-hide');
-        checkbox.checked = false;
-        document.getElementById('b44VerifyStep1').classList.remove('b44-hide');
-        document.getElementById('b44VerifyStep2').classList.add('b44-hide');
-      }, 1500);
     }
   }
 
