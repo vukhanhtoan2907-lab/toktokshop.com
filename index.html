@@ -158,6 +158,20 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
 .control-btn{background:none;border:none;color:#fff;font-size:16px;cursor:none;transition:.3s;display:flex;align-items:center;justify-content:center}
 .control-btn:hover{color:#ff6b9d;transform:scale(1.1)}
 .play-btn{font-size:22px}
+
+/* CSS CHO CÁC TOOL MIDI BÊN TRONG */
+.midi-tool { background: #1a1a24; border-radius: 12px; padding: 20px; margin-top: 20px; border: 1px solid #333; }
+.midi-tool h3 { margin-bottom: 15px; color: #ff6b9d; }
+.midi-btn { background: #ff6b9d; color: #fff; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 10px; width: 100%; transition: 0.3s; }
+.midi-btn:hover { background: #e65a8b; }
+.piano { display: flex; height: 120px; margin-top: 20px; }
+.key { flex: 1; border: 1px solid #000; cursor: pointer; border-radius: 0 0 4px 4px; }
+.key.white { background: #fff; }
+.key.white:active { background: #ccc; }
+.key.black { background: #000; flex: 0.6; height: 60%; z-index: 2; margin: 0 -0.3px; }
+.key.black:active { background: #333; }
+.piano-roll { height: 200px; background-image: linear-gradient(#222 1px, transparent 1px), linear-gradient(90deg, #222 1px, transparent 1px); background-size: 20px 20px; border-radius: 8px; position: relative; display: flex; justify-content: center; align-items: center; color: #666; }
+
 #yt-player{position:absolute;width:1px;height:1px;opacity:.01;pointer-events:none;left:-9999px;top:-9999px}
 @media(pointer:coarse),(max-width:768px){.cursor-dot,.cursor-outline{display:none!important}*{cursor:auto!important}}
 @media(max-width:900px){.visualizer,.floating-note{display:none}}
@@ -205,15 +219,15 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
       <h1 class="hero-title">SERVER SCRIPT<br><span>PIANO ROBLOX</span></h1>
       <p class="hero-desc">Trải nghiệm chơi nhạc chuyên nghiệp trong Roblox. Kho script chất lượng, tự động chơi mọi bản nhạc hot trend, cập nhật liên tục và hoàn toàn miễn phí dành cho cộng đồng.</p>
       
-      <!-- CÁC NÚT ĐÃ ĐƯỢC NỐI VỚI CÁC FILE RIÊNG BIỆT -->
+      <!-- CÁC NÚT MỞ TAB CÔNG CỤ -->
       <div class="hero-buttons">
         <a href="https://discord.gg/uynrfmcNmy" target="_blank" class="btn-glass">
           <svg viewBox="0 0 24 24"><path d="M19.59 4.69a19.6 19.6 0 00-5.05-1.58 15.25 15.25 0 00-.7 1.4 17.25 17.25 0 00-5.68 0 15.25 15.25 0 00-.7-1.4 19.6 19.6 0 00-5.05 1.58C1.13 9.24-.08 13.68.53 18a19.68 19.68 0 005.86 2.95 14 14 0 001.47-2.37 12.36 12.36 0 01-2.3-1.1c.2-.14.4-.29.6-.44a14.07 14.07 0 0012.08 0c.2.15.4.3.6.44a12.36 12.36 0 01-2.3 1.1 14 14 0 001.47 2.37A19.68 19.68 0 0023.87 18c.62-4.32-.6-8.76-4.28-13.31zM8.01 14.98c-.96 0-1.75-.88-1.75-1.96s.77-1.96 1.75-1.96c.98 0 1.77.88 1.75 1.96 0 1.08-.77 1.96-1.75 1.96zm7.98 0c-.96 0-1.75-.88-1.75-1.96s.77-1.96 1.75-1.96c.98 0 1.77.88 1.75 1.96 0 1.08-.77 1.96-1.75 1.96z"/></svg>
           Tham gia máy chủ Discord
         </a>
-        <a href="player.html" target="_blank" class="btn-glass">Mở trình phát MIDI</a>
-        <a href="editor.html" target="_blank" class="btn-glass">Mở trình chỉnh sửa MIDI</a>
-        <a href="converter.html" target="_blank" class="btn-glass">Mở MP3 sang MIDI</a>
+        <a onclick="switchTab('tools'); openTool('player'); return false;" class="btn-glass" style="cursor:none;">Mở trình phát MIDI</a>
+        <a onclick="switchTab('tools'); openTool('editor'); return false;" class="btn-glass" style="cursor:none;">Mở trình chỉnh sửa MIDI</a>
+        <a onclick="switchTab('tools'); openTool('converter'); return false;" class="btn-glass" style="cursor:none;">Mở MP3 sang MIDI</a>
       </div>
     </div>
   </section>
@@ -258,33 +272,70 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
   </div>
 </div>
 
+<!-- TRANG CÔNG CỤ MIDI TÍCH HỢP -->
 <div id="page-tools" class="page-section">
   <div class="content-box" style="max-width: 1000px;">
     <h2>🎹 Công Cụ MIDI</h2>
     <p>Chọn công cụ bạn muốn sử dụng dưới đây.</p>
     
-    <div class="tool-grid">
-      <div class="tool-card">
-        <h3>1. Trình phát MIDI</h3>
-        <p>Xem nốt nhạc rơi (Piano Roll) và nghe thử file MIDI của bạn.</p>
-        <!-- Nối tới file player.html -->
-        <a href="player.html" target="_blank" class="tool-action">Mở Trình Phát</a>
+    <div id="tool-player" class="midi-tool" style="display: none;">
+      <h3>Trình Phát MIDI</h3>
+      <p style="color: #aaa; font-size: 14px; margin-bottom: 15px;">(Giao diện giả lập, cần tích hợp thư viện Tone.js để phát file thật).</p>
+      <div class="piano-roll">Khung nốt nhạc rơi (Piano Roll)</div>
+      <div style="margin-top: 15px;">
+        <button class="midi-btn" style="width: auto; padding: 10px 20px;" onclick="alert('Chức năng phát nhạc MIDI đang được phát triển!')">▶ Phát</button>
       </div>
+      <button class="midi-btn" onclick="openTool('none')" style="background: #444; margin-top: 20px;">Đóng Công Cụ</button>
+    </div>
+
+    <div id="tool-editor" class="midi-tool" style="display: none;">
+      <h3>Chỉnh Sửa MIDI</h3>
+      <p style="color: #aaa; font-size: 14px; margin-bottom: 15px;">(Bấm thử các phím đàn bên dưới để nghe âm thanh).</p>
+      <div class="piano-roll">Khung chỉnh sửa</div>
       
-      <div class="tool-card">
-        <h3>2. Chỉnh sửa MIDI</h3>
-        <p>Chỉnh sửa nốt nhạc, thay đổi nhịp độ (Tempo), xuất file.</p>
-        <!-- Nối tới file editor.html -->
-        <a href="editor.html" target="_blank" class="tool-action">Mở Chỉnh Sửa</a>
+      <div class="piano" id="piano">
+        <!-- Các phím đàn sẽ được tạo tự động bằng JS -->
       </div>
 
-      <div class="tool-card">
-        <h3>3. Chuyển đổi MP3 / Video</h3>
-        <p>Tải lên file MP3 hoặc dán link video để chuyển thành file MIDI.</p>
-        <!-- Nối tới file converter.html -->
-        <a href="converter.html" target="_blank" class="tool-action">Mở Chuyển Đổi</a>
+      <div style="margin-top: 20px; display: flex; gap: 10px;">
+        <button class="midi-btn" onclick="alert('Đang xuất file...')">Tải xuống (.mid)</button>
+        <button class="midi-btn" onclick="openTool('none')" style="background: #444;">Đóng Công Cụ</button>
       </div>
     </div>
+
+    <div id="tool-converter" class="midi-tool" style="display: none;">
+      <h3>Chuyển MP3 / Video sang MIDI</h3>
+      <p style="color: #aaa; font-size: 14px; margin-bottom: 15px;">(Tính năng AI cần server xử lý, hiện tại chỉ là giao diện).</p>
+      <div style="border: 2px dashed #444; padding: 30px; text-align: center; border-radius: 8px; margin-bottom: 15px; cursor: pointer;">
+        📁 Kéo thả file MP3 vào đây hoặc Bấm để chọn
+      </div>
+      <input type="text" placeholder="Hoặc dán link Video (YouTube, TikTok...)" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #0b0b0f; color: #fff; margin-bottom: 15px;">
+      <button class="midi-btn" onclick="alert('Server AI đang bảo trì!')">Bắt đầu chuyển đổi</button>
+      <button class="midi-btn" onclick="openTool('none')" style="background: #444;">Đóng Công Cụ</button>
+    </div>
+
+    <div id="tool-list">
+      <div class="tool-grid">
+        <div class="tool-card">
+          <h3>1. Trình phát MIDI</h3>
+          <p>Xem nốt nhạc rơi (Piano Roll) và nghe thử file MIDI của bạn.</p>
+          <button class="tool-action" onclick="openTool('player')">Mở Trình Phát</button>
+        </div>
+        
+        <div class="tool-card">
+          <h3>2. Chỉnh sửa MIDI</h3>
+          <p>Chỉnh sửa nốt nhạc, thay đổi nhịp độ (Tempo), xuất file.</p>
+          <button class="tool-action" onclick="openTool('editor')">Mở Chỉnh Sửa</button>
+        </div>
+
+        <div class="tool-card">
+          <h3>3. Chuyển đổi MP3 / Video</h3>
+          <p>Tải lên file MP3 hoặc dán link video để chuyển thành file MIDI.</p>
+          <button class="tool-action" onclick="openTool('converter')">Mở Chuyển Đổi</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -465,6 +516,7 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
 <div id="yt-player"></div>
 
 <script>
+  // --- HIỆU ỨNG CHUỘT ---
   const dot = document.getElementById('cursor-dot');
   const outline = document.getElementById('cursor-outline');
   let mouseX = 0, mouseY = 0, outlineX = 0, outlineY = 0;
@@ -482,7 +534,7 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
   }
   animateCursor();
 
-  document.querySelectorAll('a, button, .logo, .btn, .progress-bar-bg, .faq-question, .btn-glass, .tool-action').forEach(el => {
+  document.querySelectorAll('a, button, .logo, .btn-glass, .tool-action, .faq-question, .midi-btn, .key').forEach(el => {
     el.addEventListener('mouseenter', () => { dot.classList.add('hovering'); outline.classList.add('hovering'); });
     el.addEventListener('mouseleave', () => { dot.classList.remove('hovering'); outline.classList.remove('hovering'); });
   });
@@ -498,6 +550,7 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
     setTimeout(() => ripple.remove(), 600);
   });
 
+  // --- HỆ THỐNG NHẠC NỀN ---
   var tag = document.createElement('script');
   tag.src = "https://www.youtube.com/iframe_api";
   var firstScriptTag = document.getElementsByTagName('script')[0];
@@ -609,6 +662,70 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
     }
   });
 
+  // --- CHỨC NĂNG CHUYỂN TRANG ---
+  function switchTab(tabId) {
+    document.querySelectorAll('.page-section').forEach(page => page.classList.remove('active-page'));
+    document.getElementById('page-' + tabId).classList.add('active-page');
+    document.querySelectorAll('.nav-links a').forEach(link => link.classList.remove('active'));
+    const navLink = document.getElementById('nav-' + tabId);
+    if(navLink) navLink.classList.add('active');
+    window.scrollTo(0, 0);
+
+    // Nếu chuyển sang trang Tools thì reset lại danh sách
+    if(tabId === 'tools') openTool('none');
+  }
+
+  // --- CHỨC NĂNG TOOLS MIDI TÍCH HỢP ---
+  function openTool(toolName) {
+    document.getElementById('tool-list').style.display = 'none';
+    document.querySelectorAll('.midi-tool').forEach(tool => tool.style.display = 'none');
+
+    if (toolName === 'none') {
+      document.getElementById('tool-list').style.display = 'block';
+    } else {
+      document.getElementById('tool-' + toolName).style.display = 'block';
+    }
+  }
+
+  // Tạo phím đàn Piano cho Tool Editor
+  const piano = document.getElementById('piano');
+  if (piano) {
+    const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    for (let octave = 4; octave <= 5; octave++) {
+      notes.forEach(note => {
+        const key = document.createElement('div');
+        key.className = 'key ' + (note.includes('#') ? 'black' : 'white');
+        key.addEventListener('mousedown', () => {
+          playSound(note, octave);
+        });
+        piano.appendChild(key);
+      });
+    }
+  }
+
+  // Hàm phát âm thanh Piano
+  let audioCtx;
+  function playSound(note, octave) {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const freqMap = {
+      'C': 261.63, 'C#': 277.18, 'D': 293.66, 'D#': 311.13,
+      'E': 329.63, 'F': 349.23, 'F#': 369.99, 'G': 392.00,
+      'G#': 415.30, 'A': 440.00, 'A#': 466.16, 'B': 493.88
+    };
+    let freq = freqMap[note] * Math.pow(2, octave - 4);
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 1);
+  }
+
+  // --- CÁC HÀM COPY ---
   function copyScript() {
     const text = document.getElementById('script-text').innerText.trim();
     const btn = document.getElementById('copyBtn');
@@ -616,10 +733,7 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
       const originalText = btn.innerText;
       btn.innerText = '✅ Đã copy!';
       btn.classList.add('copied');
-      setTimeout(() => {
-        btn.innerText = originalText;
-        btn.classList.remove('copied');
-      }, 2000);
+      setTimeout(() => { btn.innerText = originalText; btn.classList.remove('copied'); }, 2000);
     }).catch(err => {
       const textarea = document.createElement('textarea');
       textarea.value = text;
@@ -630,10 +744,7 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
       const btn = document.getElementById('copyBtn');
       btn.innerText = '✅ Đã copy!';
       btn.classList.add('copied');
-      setTimeout(() => {
-        btn.innerText = 'Copy';
-        btn.classList.remove('copied');
-      }, 2000);
+      setTimeout(() => { btn.innerText = 'Copy'; btn.classList.remove('copied'); }, 2000);
     });
   }
 
@@ -643,10 +754,7 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
     navigator.clipboard.writeText(text).then(() => {
       btn.innerText = '✅ Đã copy!';
       btn.classList.add('copied');
-      setTimeout(() => {
-        btn.innerText = originalText;
-        btn.classList.remove('copied');
-      }, 2000);
+      setTimeout(() => { btn.innerText = originalText; btn.classList.remove('copied'); }, 2000);
     }).catch(err => {
       const textarea = document.createElement('textarea');
       textarea.value = text;
@@ -656,20 +764,16 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
       document.body.removeChild(textarea);
       btn.innerText = '✅ Đã copy!';
       btn.classList.add('copied');
-      setTimeout(() => {
-        btn.innerText = originalText;
-        btn.classList.remove('copied');
-      }, 2000);
+      setTimeout(() => { btn.innerText = originalText; btn.classList.remove('copied'); }, 2000);
     });
   }
 
+  // --- CÁC HÀM KHÁC ---
   function toggleFaq(questionEl) {
     const item = questionEl.parentElement;
     const isOpen = item.classList.contains('open');
     document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('open'));
-    if (!isOpen) {
-      item.classList.add('open');
-    }
+    if (!isOpen) item.classList.add('open');
   }
 
   const particleContainer = document.getElementById('particles');
@@ -685,14 +789,6 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
     p.style.background = colors[Math.floor(Math.random() * colors.length)];
     p.style.boxShadow = `0 0 15px ${p.style.background}`;
     particleContainer.appendChild(p);
-  }
-
-  function switchTab(tabId) {
-    document.querySelectorAll('.page-section').forEach(page => page.classList.remove('active-page'));
-    document.getElementById('page-' + tabId).classList.add('active-page');
-    document.querySelectorAll('.nav-links a').forEach(link => link.classList.remove('active'));
-    document.getElementById('nav-' + tabId).classList.add('active');
-    window.scrollTo(0, 0);
   }
 
   window.addEventListener('scroll', () => {
