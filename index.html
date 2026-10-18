@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>🎹 Server Script Piano — Roblox</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;cursor:none}
 body{font-family:'Outfit',sans-serif;background-color:#0b0b0f;color:#fff;overflow-x:hidden;position:relative}
@@ -37,17 +37,34 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
 .hero{position:relative;height:85vh;display:flex;align-items:center;padding:0 80px;overflow:hidden;border-radius:20px;margin:0 20px}
 .hero-bg{position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle at 70% 50%,rgba(138,43,226,.4) 0%,transparent 60%),radial-gradient(circle at 30% 50%,rgba(255,107,157,.3) 0%,transparent 60%),url('https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;opacity:.85;z-index:-1}
 .hero-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(90deg,#0b0b0f 0%,rgba(11,11,15,.8) 45%,rgba(11,11,15,.1) 100%),linear-gradient(0deg,#0b0b0f 0%,transparent 40%);z-index:-1}
-.hero-content{position:relative;max-width:600px;animation:slideUp 1s cubic-bezier(.175,.885,.32,1.275);z-index:5}
+.hero-content{position:relative;max-width:700px;animation:slideUp 1s cubic-bezier(.175,.885,.32,1.275);z-index:5}
 @keyframes slideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
 .badge-top{display:inline-block;background:linear-gradient(90deg,#ff6b9d,#8a2be2);color:#fff;padding:6px 15px;border-radius:6px;font-size:13px;font-weight:800;margin-bottom:20px;letter-spacing:1px;box-shadow:0 0 15px rgba(255,107,157,.5)}
-.hero-title{font-size:65px;font-weight:800;line-height:1.1;margin-bottom:20px;text-transform:uppercase;text-shadow:0 4px 20px rgba(0,0,0,.8)}
+.hero-title{font-size:65px;font-weight:800;line-height:1.1;margin-bottom:20px;text-transform:uppercase;text-shadow:0 4px 20px rgba(0,0,0,.8);font-family:'Instrument Serif',serif}
 .hero-title span{background:linear-gradient(90deg,#ff6b9d,#c44dff,#00ffff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 15px rgba(196,77,255,.6))}
 .hero-desc{font-size:18px;color:#e0e0e0;line-height:1.6;margin-bottom:35px;text-shadow:0 2px 10px rgba(0,0,0,.8)}
-.hero-buttons{display:flex;gap:20px;align-items:center}
-.btn{display:inline-flex;align-items:center;justify-content:center;padding:15px 35px;border-radius:8px;font-size:16px;font-weight:800;text-decoration:none;transition:all .3s;cursor:none;border:none;text-transform:uppercase;letter-spacing:1px}
-.btn-primary{background:linear-gradient(90deg,#ff6b9d,#c44dff);color:#fff;box-shadow:0 0 25px rgba(255,107,157,.6)}
-.btn-primary:hover{background:linear-gradient(90deg,#ff4d88,#b13de6);transform:scale(1.05);box-shadow:0 0 40px rgba(255,107,157,.9)}
-.btn svg{width:20px;height:20px;margin-right:8px;fill:currentColor}
+
+/* --- HERO BUTTONS (LIQUID GLASS) --- */
+.hero-buttons { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 30px; }
+.btn-glass {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: rgba(20, 20, 24, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50px;
+  padding: 15px 25px;
+  color: #fff; font-size: 16px; font-weight: 600; text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.3);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2), 0 10px 20px rgba(0, 0, 0, 0.5);
+  cursor: none; text-transform: none; letter-spacing: 0;
+}
+.btn-glass:hover {
+  background: rgba(40, 40, 48, 0.95);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3), 0 15px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(255, 107, 157, 0.3);
+  border-color: rgba(255, 107, 157, 0.5);
+}
+.btn-glass svg { width: 20px; height: 20px; fill: currentColor; }
+
 .visualizer{position:absolute;right:10%;top:50%;transform:translateY(-50%);display:flex;gap:8px;align-items:flex-end;height:150px;z-index:5;opacity:.8}
 .bar{width:12px;background:linear-gradient(0deg,#ff6b9d,#8a2be2,#00ffff);border-radius:10px 10px 0 0;animation:soundWave 1.2s ease-in-out infinite alternate;box-shadow:0 0 15px rgba(138,43,226,.5)}
 .bar:nth-child(1){height:30%;animation-delay:.1s}.bar:nth-child(2){height:60%;animation-delay:.3s}
@@ -73,7 +90,7 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
 .card-item h3{font-size:20px;margin-bottom:10px;color:#fff}
 .card-item p{font-size:15px;color:#aaa;line-height:1.5}
 .content-box{background:rgba(28,28,36,.85);backdrop-filter:blur(15px);border-radius:16px;padding:35px;max-width:800px;margin:0 auto;border:1px solid rgba(255,255,255,.1);box-shadow:0 20px 40px rgba(0,0,0,.5)}
-.content-box h2{font-size:28px;margin-bottom:20px;color:#ff6b9d;text-transform:uppercase}
+.content-box h2{font-size:28px;margin-bottom:20px;color:#ff6b9d;text-transform:uppercase;font-family:'Instrument Serif',serif}
 .content-box p{font-size:16px;color:#ccc;line-height:1.6;margin-bottom:15px}
 .code-box{background:#0d0d12;border:1px solid #333;border-radius:10px;padding:20px;font-family:monospace;font-size:15px;color:#00ffaa;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;word-break:break-all;box-shadow:inset 0 0 20px rgba(0,0,0,.8)}
 .btn-copy{background:#ff6b9d;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:none;font-weight:bold;transition:.3s;margin-left:15px;flex-shrink:0;box-shadow:0 0 15px rgba(255,107,157,.4)}
@@ -91,6 +108,16 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
 .faq-answer{max-height:0;overflow:hidden;transition:max-height .4s ease,padding .3s ease;padding:0 22px;color:#bbb;font-size:15px;line-height:1.6}
 .faq-item.open .faq-answer{max-height:300px;padding:0 22px 20px 22px}
 .faq-answer code{background:#0d0d12;color:#00ffaa;padding:2px 8px;border-radius:4px;font-family:monospace;font-size:14px}
+
+/* --- TOOLS GRID --- */
+.tool-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-top:30px}
+.tool-card{background:rgba(28,28,36,.8);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:30px;transition:.3s;display:flex;flex-direction:column}
+.tool-card:hover{transform:translateY(-5px);border-color:rgba(255,107,157,.5);box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.tool-card h3{font-size:20px;color:#fff;margin-bottom:10px}
+.tool-card p{font-size:14px;color:#aaa;margin-bottom:20px;flex-grow:1}
+.tool-action{background:linear-gradient(90deg,#ff6b9d,#c44dff);color:#fff;border:none;padding:12px;border-radius:8px;font-weight:bold;cursor:none;text-align:center;transition:.3s;text-decoration:none;display:block}
+.tool-action:hover{transform:scale(1.02);box-shadow:0 0 20px rgba(255,107,157,.6)}
+
 .hack-grid{display:grid;grid-template-columns:1fr;gap:25px;margin-top:30px}
 .hack-card{background:rgba(20,20,28,.9);border:1px solid rgba(255,255,255,.1);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;transition:.3s}
 .hack-card:hover{border-color:rgba(255,107,157,.5);box-shadow:0 10px 30px rgba(0,0,0,.5)}
@@ -101,7 +128,7 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
 .hack-info p{font-size:15px;color:#aaa;margin-bottom:20px}
 @media(min-width:768px){.hack-card{flex-direction:row}.hack-thumb{width:35%;height:auto;border-bottom:none;border-right:1px solid rgba(255,255,255,.05)}.hack-info{width:65%;display:flex;flex-direction:column;justify-content:center}}
 .ai-event-banner{max-width:700px;margin:40px auto 0;padding:30px;background:rgba(20,20,28,.9);border:1px solid rgba(255,255,255,.1);border-radius:20px;text-align:center}
-.ai-event-title{font-size:22px;font-weight:800;text-transform:uppercase;line-height:1.3;margin-bottom:15px;color:#fff}
+.ai-event-title{font-size:22px;font-weight:800;text-transform:uppercase;line-height:1.3;margin-bottom:15px;color:#fff;font-family:'Instrument Serif',serif}
 .ai-event-title span{color:#00ffaa}
 .ai-event-desc{font-size:15px;color:#ccc;line-height:1.6;margin-bottom:0}
 .ai-event-desc b{color:#fff}
@@ -158,6 +185,7 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
     <a onclick="switchTab('guide')" id="nav-guide">Hướng dẫn</a>
     <a onclick="switchTab('faq')" id="nav-faq">FAQ</a>
     <a onclick="switchTab('community')" id="nav-community">Cộng đồng</a>
+    <a onclick="switchTab('tools')" id="nav-tools">Công cụ MIDI</a>
   </div>
 </header>
 
@@ -176,10 +204,16 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
       <div class="badge-top">MIỄN PHÍ 100% - KHÔNG KEY</div>
       <h1 class="hero-title">SERVER SCRIPT<br><span>PIANO ROBLOX</span></h1>
       <p class="hero-desc">Trải nghiệm chơi nhạc chuyên nghiệp trong Roblox. Kho script chất lượng, tự động chơi mọi bản nhạc hot trend, cập nhật liên tục và hoàn toàn miễn phí dành cho cộng đồng.</p>
+      
+      <!-- CÁC NÚT ĐÃ ĐƯỢC NỐI VỚI CÁC FILE RIÊNG BIỆT -->
       <div class="hero-buttons">
-        <a href="https://discord.gg/uynrfmcNmy" target="_blank" class="btn btn-primary">
-          <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg> Tham gia Discord
+        <a href="https://discord.gg/uynrfmcNmy" target="_blank" class="btn-glass">
+          <svg viewBox="0 0 24 24"><path d="M19.59 4.69a19.6 19.6 0 00-5.05-1.58 15.25 15.25 0 00-.7 1.4 17.25 17.25 0 00-5.68 0 15.25 15.25 0 00-.7-1.4 19.6 19.6 0 00-5.05 1.58C1.13 9.24-.08 13.68.53 18a19.68 19.68 0 005.86 2.95 14 14 0 001.47-2.37 12.36 12.36 0 01-2.3-1.1c.2-.14.4-.29.6-.44a14.07 14.07 0 0012.08 0c.2.15.4.3.6.44a12.36 12.36 0 01-2.3 1.1 14 14 0 001.47 2.37A19.68 19.68 0 0023.87 18c.62-4.32-.6-8.76-4.28-13.31zM8.01 14.98c-.96 0-1.75-.88-1.75-1.96s.77-1.96 1.75-1.96c.98 0 1.77.88 1.75 1.96 0 1.08-.77 1.96-1.75 1.96zm7.98 0c-.96 0-1.75-.88-1.75-1.96s.77-1.96 1.75-1.96c.98 0 1.77.88 1.75 1.96 0 1.08-.77 1.96-1.75 1.96z"/></svg>
+          Tham gia máy chủ Discord
         </a>
+        <a href="player.html" target="_blank" class="btn-glass">Mở trình phát MIDI</a>
+        <a href="editor.html" target="_blank" class="btn-glass">Mở trình chỉnh sửa MIDI</a>
+        <a href="converter.html" target="_blank" class="btn-glass">Mở MP3 sang MIDI</a>
       </div>
     </div>
   </section>
@@ -224,10 +258,39 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
   </div>
 </div>
 
+<div id="page-tools" class="page-section">
+  <div class="content-box" style="max-width: 1000px;">
+    <h2>🎹 Công Cụ MIDI</h2>
+    <p>Chọn công cụ bạn muốn sử dụng dưới đây.</p>
+    
+    <div class="tool-grid">
+      <div class="tool-card">
+        <h3>1. Trình phát MIDI</h3>
+        <p>Xem nốt nhạc rơi (Piano Roll) và nghe thử file MIDI của bạn.</p>
+        <!-- Nối tới file player.html -->
+        <a href="player.html" target="_blank" class="tool-action">Mở Trình Phát</a>
+      </div>
+      
+      <div class="tool-card">
+        <h3>2. Chỉnh sửa MIDI</h3>
+        <p>Chỉnh sửa nốt nhạc, thay đổi nhịp độ (Tempo), xuất file.</p>
+        <!-- Nối tới file editor.html -->
+        <a href="editor.html" target="_blank" class="tool-action">Mở Chỉnh Sửa</a>
+      </div>
+
+      <div class="tool-card">
+        <h3>3. Chuyển đổi MP3 / Video</h3>
+        <p>Tải lên file MP3 hoặc dán link video để chuyển thành file MIDI.</p>
+        <!-- Nối tới file converter.html -->
+        <a href="converter.html" target="_blank" class="tool-action">Mở Chuyển Đổi</a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="page-hack" class="page-section">
   <div class="content-box" style="max-width: 900px;">
     <h2>💀 Kho Script Khác</h2>
-    
     <div class="hack-grid">
       
       <div class="hack-card">
@@ -419,12 +482,11 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
   }
   animateCursor();
 
-  document.querySelectorAll('a, button, .logo, .btn, .progress-bar-bg, .faq-question').forEach(el => {
+  document.querySelectorAll('a, button, .logo, .btn, .progress-bar-bg, .faq-question, .btn-glass, .tool-action').forEach(el => {
     el.addEventListener('mouseenter', () => { dot.classList.add('hovering'); outline.classList.add('hovering'); });
     el.addEventListener('mouseleave', () => { dot.classList.remove('hovering'); outline.classList.remove('hovering'); });
   });
 
-  // Hiệu ứng gợn sóng khi click/chạm
   document.addEventListener('click', (e) => {
     const ripple = document.createElement('div');
     ripple.classList.add('ripple-effect');
