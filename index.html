@@ -7,6 +7,8 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;cursor:none}
 body{font-family:'Outfit',sans-serif;background-color:#0b0b0f;color:#fff;overflow-x:hidden;position:relative}
+body.editor-open,body.editor-open *{cursor:auto !important}
+body.editor-open .cursor-dot,body.editor-open .cursor-outline{display:none !important}
 .cursor-dot{position:fixed;top:0;left:0;width:8px;height:8px;background:#00ffff;border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);box-shadow:0 0 15px #00ffff,0 0 30px #00ffff;transition:width .2s,height .2s,background .2s}
 .cursor-outline{position:fixed;top:0;left:0;width:40px;height:40px;border:2px solid rgba(255,107,157,.5);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:transform .1s ease-out,width .2s,height .2s,border-color .2s}
 .cursor-dot.hovering{width:15px;height:15px;background:#ff6b9d;box-shadow:0 0 20px #ff6b9d,0 0 40px #ff6b9d}
@@ -126,6 +128,7 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
 .community-card p{font-size:15px;color:#ccc}
 .bottom-player{position:fixed;bottom:0;left:0;width:100%;background:rgba(11,11,15,.85);backdrop-filter:blur(15px);border-top:1px solid rgba(255,255,255,.05);padding:15px 30px;display:flex;justify-content:center;align-items:center;z-index:1000;transform:translateY(100%);transition:transform .5s cubic-bezier(.175,.885,.32,1.275)}
 .bottom-player.show{transform:translateY(0)}
+body.editor-open .bottom-player{transform:translateY(100%) !important}
 .player-inner{width:100%;max-width:600px;display:flex;align-items:center;gap:15px}
 .music-player-container{position:relative;width:52px;height:52px;flex-shrink:0;border-radius:50%;box-shadow:0 5px 15px rgba(0,0,0,.5)}
 .music-cover{width:100%;height:100%;border-radius:50%;background:url('https://i.ytimg.com/vi/2C-soKZvOdk/hqdefault.jpg') center/cover;border:1px solid rgba(255,255,255,.2);position:relative;overflow:hidden}
@@ -155,6 +158,110 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
 .dev-btn:hover { background: rgba(255, 255, 255, 0.2); border-color: #ff6b9d; }
 
 #yt-player{position:absolute;width:1px;height:1px;opacity:.01;pointer-events:none;left:-9999px;top:-9999px}
+
+/* ===== MIDI EMBED SCOPE ===== */
+.midi-embed{
+  --bg:#0b1020;--panel:#121a2d;--panel2:#172239;--line:#2b3853;--text:#edf3ff;--muted:#9aabc8;
+  --cyan:#5ee7f5;--purple:#a78bfa;--note:#4dd4c6;--note2:#8b7cff;--danger:#ff6b86;
+  --row-h:18px;--keys-w:90px;--ruler-h:28px;
+  display:none;
+  background:rgba(18,26,45,.95);
+  border:1px solid #283650;
+  border-radius:16px;
+  padding:16px;
+  margin-top:20px;
+  color:var(--text);
+  font:14px/1.45 system-ui,-apple-system,Segoe UI,sans-serif;
+  cursor:auto;
+  position:relative;
+  z-index:5;
+}
+.midi-embed.open{display:block;animation:fadeIn .3s ease}
+.midi-embed *{box-sizing:border-box;cursor:auto}
+.midi-embed button,.midi-embed input,.midi-embed select{font:inherit}
+.midi-embed button{border:1px solid var(--line);background:#1b2944;color:var(--text);border-radius:9px;padding:9px 12px;cursor:pointer;transition:.15s}
+.midi-embed button:hover{border-color:var(--cyan);background:#223454}
+.midi-embed button.primary{background:linear-gradient(120deg,#277f95,#6552b8);border:0}
+.midi-embed button.active{outline:2px solid var(--cyan);background:#21475a}
+.midi-embed button.danger{color:#ff9eae}
+.midi-embed button:disabled{opacity:.4;cursor:not-allowed}
+.midi-embed .midi-topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-bottom:1px solid #26334c;margin:-16px -16px 12px;background:#0c1323;border-radius:16px 16px 0 0}
+.midi-embed .midi-topbar h2{margin:0;font-size:15px;color:var(--text)}
+.midi-embed .midi-topbar small{color:var(--muted);font-size:12px}
+.midi-embed .header-actions,.midi-embed .toolbar,.midi-embed .transport{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.midi-embed .panel{background:linear-gradient(145deg,#121b2e,#10182a);border:1px solid #283650;border-radius:15px;overflow:hidden;box-shadow:0 12px 30px #0002;margin-bottom:12px}
+.midi-embed .muted{color:var(--muted)}
+.midi-embed .small{font-size:12px}
+.midi-embed #dropzone{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px}
+.midi-embed .dropcopy{display:flex;gap:12px;align-items:center}
+.midi-embed .upload-icon{font-size:22px;background:#1b2a44;border-radius:12px;padding:10px}
+.midi-embed .dropcopy strong{display:block;font-size:14px}
+.midi-embed .dropcopy span{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.midi-embed #dropzone.drag{outline:2px dashed var(--cyan);background:#12283a}
+.midi-embed .toolbar{padding:10px 12px;border-bottom:1px solid #26334c;background:#0e1626}
+.midi-embed .toolgroup{display:flex;align-items:center;gap:7px;padding-right:10px;margin-right:2px;border-right:1px solid #2a3751}
+.midi-embed .toolgroup:last-child{border:0}
+.midi-embed .label{font-size:12px;color:var(--muted)}
+.midi-embed input[type=number],.midi-embed select{background:#0c1425;border:1px solid #2b3a55;color:var(--text);border-radius:8px;padding:8px;width:75px}
+.midi-embed #status{color:var(--muted);font-size:12px;margin-left:auto}
+.midi-embed .editor-wrap{height:min(60vh,640px);min-height:380px;background:#0c1423;position:relative}
+.midi-embed #scrollarea{width:100%;height:100%;overflow:auto;position:relative;background:#0b1323;overscroll-behavior:contain}
+.midi-embed #piano{position:relative;min-width:900px;user-select:none;touch-action:pan-x pan-y;display:flex;flex-direction:column}
+.midi-embed #ruler{height:var(--ruler-h);position:sticky;top:0;z-index:6;background:#121d31;border-bottom:1px solid #33425e;color:#a9bad5;font-size:11px;flex:0 0 auto}
+.midi-embed #body{display:flex;align-items:flex-start;position:relative;flex:1 0 auto}
+.midi-embed #keys{position:sticky;left:0;top:var(--ruler-h);flex:0 0 var(--keys-w);width:var(--keys-w);align-self:flex-start;height:fit-content;background:#0c1423;border-right:1px solid var(--line);z-index:5}
+.midi-embed #grid{flex:1 1 auto;min-width:0;position:relative;background-image:linear-gradient(to right,#27354d 1px,transparent 1px),linear-gradient(to right,#40516c 1px,transparent 1px),linear-gradient(to bottom,#202d44 1px,transparent 1px);background-size:var(--beat) 100%,var(--bar) 100%,100% var(--row-h);background-position:0 0}
+.midi-embed #playhead{position:absolute;left:0;top:0;bottom:0;width:2px;background:#42ff8a;box-shadow:0 0 8px #42ff8a,0 0 18px #42ff8a;z-index:6;pointer-events:none;display:none}
+.midi-embed .key{position:absolute;left:0;right:0;height:var(--row-h);border-bottom:1px solid #aeb9c9;display:flex;align-items:center;justify-content:flex-end;padding-right:5px;font-size:9px;color:#53627a;background:linear-gradient(90deg,#f4f7fb,#dbe3ee);cursor:pointer;z-index:1}
+.midi-embed .key.black{left:0;right:24%;background:linear-gradient(90deg,#263249,#080d17);border:1px solid #46536a;border-radius:0 0 4px 0;color:#e9f1ff;justify-content:flex-start;padding-left:5px;z-index:2}
+.midi-embed .key.c{color:#17243a;background:linear-gradient(90deg,#fff,#d8e5f3);font-weight:800;border-bottom:2px solid #8296b2}
+.midi-embed .key:active{filter:brightness(1.25)}
+.midi-embed .tick{position:absolute;top:0;height:100%;border-left:1px solid #40506c;padding:5px}
+.midi-embed .tick.beat{border-left-color:#273650}
+.midi-embed .note{position:absolute;height:calc(var(--row-h) - 2px);border-radius:4px;background:linear-gradient(100deg,#38cfc2,#2b9eb7);border:1px solid #8bf4e7;box-shadow:0 2px 8px #24d6c044;cursor:grab;z-index:2;min-width:5px}
+.midi-embed .note:nth-child(3n){background:linear-gradient(100deg,#8f80ff,#6657cb);border-color:#c0b8ff}
+.midi-embed .note.selected{outline:2px solid #fff;z-index:3;background:linear-gradient(100deg,#111827,#020617)!important;border:2px solid #f8fafc!important;box-shadow:0 0 0 2px #38bdf8,0 0 12px #38bdf888;filter:brightness(1.15)}
+.midi-embed .note.dragging{cursor:grabbing;opacity:.8}
+.midi-embed .note .resize{position:absolute;right:-1px;top:-2px;width:14px;height:calc(100% + 4px);cursor:ew-resize;z-index:5;border-radius:0 5px 5px 0;background:linear-gradient(90deg,transparent,#ffffff55)}
+.midi-embed .note .resize::after{content:'⋮';position:absolute;right:2px;top:50%;transform:translateY(-52%);font-size:12px;font-weight:900;color:#fff;text-shadow:0 1px 3px #000;opacity:.95}
+.midi-embed .note:hover .resize,.midi-embed .note.selected .resize{background:linear-gradient(90deg,transparent,#ffffff99)}
+.midi-embed .note.selected .resize::after{color:#38bdf8}
+.midi-embed #emptyHint{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:#8192b0;pointer-events:none;padding:20px}
+.midi-embed .bottom{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:10px 12px}
+.midi-embed .progress{height:5px;background:#26334b;border-radius:8px;overflow:hidden;margin-top:8px}
+.midi-embed .progress div{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--purple));transition:width .05s linear}
+.midi-embed #context{position:fixed;z-index:99995;display:none;background:#111d32;border:1px solid #3b4d6c;box-shadow:0 12px 30px #0008;border-radius:10px;padding:6px;min-width:180px;cursor:auto}
+.midi-embed #context button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:8px 10px;border-radius:6px}
+.midi-embed #context button:hover{background:#243653}
+.midi-embed #context .sep{height:1px;background:#2a3b56;margin:4px 2px}
+.midi-embed #context .ctx-label{font-size:10px;color:var(--muted);padding:6px 10px 4px;text-transform:uppercase;letter-spacing:.5px}
+.midi-embed #helpModal{position:fixed;inset:0;z-index:99996;display:none;background:#000a;backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px;cursor:auto}
+.midi-embed #helpModal.open{display:flex}
+.midi-embed .help-box{background:linear-gradient(145deg,#141e33,#0d1525);border:1px solid #3b4d6c;border-radius:16px;max-width:720px;width:100%;max-height:85vh;overflow:auto;box-shadow:0 30px 80px #000a}
+.midi-embed .help-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #2a3b56;position:sticky;top:0;background:#141e33;z-index:1}
+.midi-embed .help-head h2{margin:0;font-size:17px;color:var(--text)}
+.midi-embed .help-body{padding:18px 20px;color:var(--text)}
+.midi-embed .help-body h3{font-size:13px;margin:18px 0 8px;color:var(--cyan);text-transform:uppercase;letter-spacing:.5px}
+.midi-embed .help-body h3:first-child{margin-top:0}
+.midi-embed .help-body table{width:100%;border-collapse:collapse;font-size:13px}
+.midi-embed .help-body td{padding:7px 4px;border-bottom:1px solid #1f2d44;vertical-align:top}
+.midi-embed .help-body td:first-child{width:170px;color:var(--muted)}
+.midi-embed kbd{display:inline-block;background:#1c2942;border:1px solid #3b4d6c;border-bottom-width:2px;border-radius:5px;padding:2px 6px;font:12px/1 ui-monospace,monospace;color:#dbe7ff}
+.midi-embed #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#243954;border:1px solid #52728f;padding:10px 15px;border-radius:10px;z-index:99999;display:none;box-shadow:0 10px 30px #0008;color:var(--text)}
+.midi-embed .info-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.midi-embed .info{padding:13px 15px}
+.midi-embed .info strong{display:block;font-size:18px;color:var(--text)}
+.midi-embed .info span{font-size:12px;color:var(--muted)}
+@media(max-width:700px){
+  .midi-embed{--keys-w:48px;padding:10px}
+  .midi-embed .key{font-size:8px}
+  .midi-embed #dropzone{align-items:flex-start;flex-direction:column}
+  .midi-embed .info-grid{grid-template-columns:1fr}
+  .midi-embed .bottom{grid-template-columns:1fr}
+  .midi-embed .toolgroup{border:0;padding:0}
+  .midi-embed .toolbar{gap:12px}
+}
+
 @media(pointer:coarse),(max-width:768px){.cursor-dot,.cursor-outline{display:none!important}*{cursor:auto!important}}
 @media(max-width:900px){.visualizer,.floating-note{display:none}}
 @media(max-width:768px){header{padding:15px 20px;flex-direction:column;gap:15px}.hero-title{font-size:40px}.hero-desc{font-size:15px}.hero{padding:0 20px}.section-container{padding:0 20px}.intro-text{font-size:24px}.bottom-player{padding:10px 15px}.code-box{flex-direction:column;gap:15px}.btn-group{margin-left:0;width:100%}.btn-group button{flex:1}}
@@ -206,7 +313,6 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
           <svg viewBox="0 0 24 24"><path d="M19.59 4.69a19.6 19.6 0 00-5.05-1.58 15.25 15.25 0 00-.7 1.4 17.25 17.25 0 00-5.68 0 15.25 15.25 0 00-.7-1.4 19.6 19.6 0 00-5.05 1.58C1.13 9.24-.08 13.68.53 18a19.68 19.68 0 005.86 2.95 14 14 0 001.47-2.37 12.36 12.36 0 01-2.3-1.1c.2-.14.4-.29.6-.44a14.07 14.07 0 0012.08 0c.2.15.4.3.6.44a12.36 12.36 0 01-2.3 1.1 14 14 0 001.47 2.37A19.68 19.68 0 0023.87 18c.62-4.32-.6-8.76-4.28-13.31zM8.01 14.98c-.96 0-1.75-.88-1.75-1.96s.77-1.96 1.75-1.96c.98 0 1.77.88 1.75 1.96 0 1.08-.77 1.96-1.75 1.96zm7.98 0c-.96 0-1.75-.88-1.75-1.96s.77-1.96 1.75-1.96c.98 0 1.77.88 1.75 1.96 0 1.08-.77 1.96-1.75 1.96z"/></svg>
           Tham gia máy chủ Discord
         </a>
-        <a href="javascript:void(0);" onclick="switchTab('tools'); openTool('player');" class="btn-glass">Mở trình phát MIDI</a>
         <a href="javascript:void(0);" onclick="switchTab('tools'); openTool('editor');" class="btn-glass">Mở trình chỉnh sửa MIDI</a>
         <a href="javascript:void(0);" onclick="switchTab('tools'); openTool('converter');" class="btn-glass">Mở MP3 sang MIDI</a>
       </div>
@@ -255,27 +361,11 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
 
 <!-- TRANG CÔNG CỤ MIDI -->
 <div id="page-tools" class="page-section">
-  <div class="content-box" style="max-width: 1000px;">
+  <div class="content-box" style="max-width: 1200px;">
     <h2>🎹 Công Cụ MIDI</h2>
     <p>Chọn công cụ bạn muốn sử dụng dưới đây.</p>
-    
-    <!-- TOOL 1: PLAYER (ĐANG PHÁT TRIỂN) -->
-    <div id="tool-player" class="dev-tool">
-      <div class="dev-icon">🚧</div>
-      <div class="dev-title">Đang Phát Triển</div>
-      <div class="dev-desc">Tính năng Trình phát MIDI hiện đang trong quá trình phát triển. Chưa rõ ngày phát hành chính thức.</div>
-      <button class="dev-btn" onclick="openTool('none')">Quay Lại</button>
-    </div>
 
-    <!-- TOOL 2: EDITOR (ĐANG PHÁT TRIỂN) -->
-    <div id="tool-editor" class="dev-tool">
-      <div class="dev-icon">🚧</div>
-      <div class="dev-title">Đang Phát Triển</div>
-      <div class="dev-desc">Tính năng Chỉnh sửa MIDI hiện đang trong quá trình phát triển. Chưa rõ ngày phát hành chính thức.</div>
-      <button class="dev-btn" onclick="openTool('none')">Quay Lại</button>
-    </div>
-
-    <!-- TOOL 3: CONVERTER (ĐANG PHÁT TRIỂN) -->
+    <!-- TOOL: CONVERTER (ĐANG PHÁT TRIỂN) -->
     <div id="tool-converter" class="dev-tool">
       <div class="dev-icon">🚧</div>
       <div class="dev-title">Đang Phát Triển</div>
@@ -283,22 +373,123 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
       <button class="dev-btn" onclick="openTool('none')">Quay Lại</button>
     </div>
 
+    <!-- TOOL: EDITOR (MIDI Studio Editor nhúng trực tiếp) -->
+    <div id="tool-editor" class="midi-embed">
+      <div class="midi-topbar">
+        <div>
+          <h2>♫ MIDI Studio Pro</h2>
+          <small>Piano Roll · chỉnh sửa MIDI trực tiếp</small>
+        </div>
+        <div class="header-actions">
+          <button id="midiOpenBtn" class="primary">↑ Mở file MIDI</button>
+          <input id="midiFileInput" type="file" accept=".mid,.midi,audio/midi" hidden>
+          <button id="midiExportBtn">↓ Xuất MIDI</button>
+          <button id="midiHelpBtn" title="Hướng dẫn & phím tắt">?</button>
+          <button id="midiCloseBtn" title="Đóng trình chỉnh sửa">✕ Đóng</button>
+        </div>
+      </div>
+
+      <section class="panel" id="midiDropzone">
+        <div class="dropcopy">
+          <div class="upload-icon">♫</div>
+          <div>
+            <strong id="midiFileName">Chưa có file MIDI nào</strong>
+            <span>Kéo thả file .mid/.midi vào đây hoặc bấm “Mở file MIDI”. Chỉnh sửa nốt rồi xuất file MIDI mới.</span>
+          </div>
+        </div>
+        <div class="small muted">Kéo thân nốt để di chuyển · kéo mép phải ⋮ để đổi độ dài · chuột phải để mở menu · ? để xem phím tắt</div>
+      </section>
+
+      <section class="panel">
+        <div class="toolbar">
+          <div class="toolgroup"><span class="label">CHẾ ĐỘ</span><button id="midiAddMode" class="active">＋ Tạo nốt</button><button id="midiMoveMode">↔ Di chuyển</button></div>
+          <div class="toolgroup"><span class="label">ĐỘ DÀI</span><select id="midiDuration"><option value="0.25">1/16</option><option value="0.5">1/8</option><option value="1" selected>1/4</option><option value="2">1/2</option><option value="4">1 ô nhịp</option></select></div>
+          <div class="toolgroup"><span class="label">BPM</span><input id="midiBpm" type="number" min="30" max="300" value="120"></div>
+          <div class="toolgroup"><span class="label">LƯỚI</span><select id="midiSnap"><option value="0.25">1/16</option><option value="0.5" selected>1/8</option><option value="1">1/4</option></select></div>
+          <button id="midiSelectAllBtn" title="Chọn tất cả (Ctrl+A)">☰ Chọn tất cả</button>
+          <button id="midiUndoBtn" title="Hoàn tác">↶</button><button id="midiRedoBtn" title="Làm lại">↷</button>
+          <span id="midiStatus">Sẵn sàng</span>
+        </div>
+        <div class="editor-wrap">
+          <div id="scrollarea">
+            <div id="piano">
+              <div id="ruler"></div>
+              <div id="body">
+                <div id="keys" aria-label="Đàn piano ảo; nhấn phím để nghe nốt"></div>
+                <div id="grid">
+                  <div id="playhead"></div>
+                  <div id="emptyHint">Mở một file MIDI để xem nốt nhạc<br>hoặc chuyển sang “Tạo nốt” để bắt đầu.<br><br><span class="small">Chuột phải để mở menu · ? để xem hướng dẫn</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bottom">
+          <div>
+            <div class="transport">
+              <button id="midiPlayBtn" class="primary">▶ Phát toàn bài</button>
+              <button id="midiStopBtn">■ Dừng</button>
+              <span class="muted small" id="midiPlayLabel">Chưa phát</span>
+            </div>
+            <div class="progress"><div id="midiProgressBar"></div></div>
+          </div>
+          <div class="transport"><button id="midiZoomOut">− Thu nhỏ</button><button id="midiZoomIn">＋ Phóng to</button></div>
+        </div>
+      </section>
+
+      <div class="info-grid">
+        <section class="panel info"><span>Số nốt</span><strong id="midiNoteCount">0</strong></section>
+        <section class="panel info"><span>Độ dài bản nhạc</span><strong id="midiSongLength">0 ô nhịp</strong></section>
+        <section class="panel info"><span>Track đang chỉnh sửa</span><strong id="midiTrackLabel">Track 1</strong></section>
+      </div>
+
+      <!-- Context menu của editor -->
+      <div id="context"></div>
+
+      <!-- Help modal của editor -->
+      <div id="helpModal">
+        <div class="help-box">
+          <div class="help-head">
+            <h2>Hướng dẫn &amp; Phím tắt</h2>
+            <button id="helpClose">✕ Đóng</button>
+          </div>
+          <div class="help-body">
+            <h3>Thao tác chuột</h3>
+            <table>
+              <tr><td>Chuột trái trên nền</td><td>Tạo nốt mới (ở chế độ Tạo nốt)</td></tr>
+              <tr><td>Chuột trái trên nốt</td><td>Chọn nốt (giữ <kbd>Ctrl</kbd>/<kbd>Shift</kbd> để chọn nhiều)</td></tr>
+              <tr><td>Kéo thân nốt</td><td>Di chuyển nốt theo thời gian &amp; cao độ</td></tr>
+              <tr><td>Kéo mép phải (⋮)</td><td>Thay đổi độ dài nốt</td></tr>
+              <tr><td>Chuột phải trên nốt</td><td>Mở menu xóa / nhân đôi nốt</td></tr>
+              <tr><td>Chuột phải trên nền</td><td>Mở menu chuyển chế độ, chọn tất cả, hướng dẫn</td></tr>
+              <tr><td>Chuột trái trên phím đàn</td><td>Nghe thử nốt piano</td></tr>
+            </table>
+            <h3>Phím tắt</h3>
+            <table>
+              <tr><td><kbd>Ctrl</kbd> + <kbd>A</kbd></td><td>Chọn tất cả nốt</td></tr>
+              <tr><td><kbd>Ctrl</kbd> / <kbd>Shift</kbd> + click</td><td>Chọn / bỏ chọn nhiều nốt</td></tr>
+              <tr><td><kbd>Backspace</kbd> / <kbd>Delete</kbd></td><td>Xóa nốt đang chọn</td></tr>
+              <tr><td><kbd>Esc</kbd></td><td>Bỏ chọn / đóng menu / đóng hướng dẫn</td></tr>
+              <tr><td><kbd>Ctrl</kbd> + <kbd>Z</kbd></td><td>Hoàn tác</td></tr>
+              <tr><td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd> / <kbd>Ctrl</kbd> + <kbd>Y</kbd></td><td>Làm lại</td></tr>
+              <tr><td><kbd>Space</kbd></td><td>Phát / tạm dừng</td></tr>
+              <tr><td><kbd>?</kbd> hoặc <kbd>F1</kbd></td><td>Mở hướng dẫn này</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="tool-list">
       <div class="tool-grid">
         <div class="tool-card">
-          <h3>1. Trình phát MIDI</h3>
-          <p>Xem nốt nhạc rơi (Piano Roll) và nghe thử file MIDI của bạn.</p>
-          <button class="tool-action" onclick="openTool('player')">Mở Trình Phát</button>
-        </div>
-        
-        <div class="tool-card">
-          <h3>2. Chỉnh sửa MIDI</h3>
-          <p>Chỉnh sửa nốt nhạc, thay đổi nhịp độ (Tempo), xuất file.</p>
+          <h3>1. Chỉnh sửa MIDI</h3>
+          <p>Chỉnh sửa nốt nhạc trên Piano Roll, thay đổi nhịp độ (Tempo), xuất file MIDI.</p>
           <button class="tool-action" onclick="openTool('editor')">Mở Chỉnh Sửa</button>
         </div>
 
         <div class="tool-card">
-          <h3>3. Chuyển đổi MP3 / Video</h3>
+          <h3>2. Chuyển đổi MP3 / Video</h3>
           <p>Tải lên file MP3 hoặc dán link video để chuyển thành file MIDI bằng AI.</p>
           <button class="tool-action" onclick="openTool('converter')">Mở Chuyển Đổi</button>
         </div>
@@ -312,7 +503,6 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
   <div class="content-box" style="max-width: 900px;">
     <h2>💀 Kho Script Khác</h2>
     <div class="hack-grid">
-      
       <div class="hack-card">
         <div class="hack-thumb" style="background-image: url('https://cdn.phototourl.com/member/2026-10-18-e2b57968-9fd5-4307-9244-7ae249a17737.webp'); background-color: #2a2a35;">
            <div class="hack-tag">HIBOX</div>
@@ -360,7 +550,6 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </div>
@@ -385,54 +574,42 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
           <span>🔴 HttpGet is not a valid member</span>
           <span class="faq-icon">▼</span>
         </div>
-        <div class="faq-answer">
-          Executor chưa inject xong. Đợi thông báo <b>Injected</b> rồi execute lại.
-        </div>
+        <div class="faq-answer">Executor chưa inject xong. Đợi thông báo <b>Injected</b> rồi execute lại.</div>
       </div>
       <div class="faq-item">
         <div class="faq-question" onclick="toggleFaq(this)">
           <span>🔴 attempt to call a nil value</span>
           <span class="faq-icon">▼</span>
         </div>
-        <div class="faq-answer">
-          Loadstring bị copy thiếu. Copy lại nguyên vẹn cả dòng, đặc biệt là hai dấu ngoặc <code>()</code> ở cuối.
-        </div>
+        <div class="faq-answer">Loadstring bị copy thiếu. Copy lại nguyên vẹn cả dòng, đặc biệt là hai dấu ngoặc <code>()</code> ở cuối.</div>
       </div>
       <div class="faq-item">
         <div class="faq-question" onclick="toggleFaq(this)">
           <span>🔴 Không hiện giao diện</span>
           <span class="faq-icon">▼</span>
         </div>
-        <div class="faq-answer">
-          Nhấn phím <code>Insert</code>. Nếu vẫn không được thì thoát game, vào lại rồi chạy script lần nữa.
-        </div>
+        <div class="faq-answer">Nhấn phím <code>Insert</code>. Nếu vẫn không được thì thoát game, vào lại rồi chạy script lần nữa.</div>
       </div>
       <div class="faq-item">
         <div class="faq-question" onclick="toggleFaq(this)">
           <span>🔴 Bấm Play nhưng không ra tiếng</span>
           <span class="faq-icon">▼</span>
         </div>
-        <div class="faq-answer">
-          Bạn chưa ngồi vào đàn, hoặc đang ở sai game. Ngồi vào ghế piano trước đã.
-        </div>
+        <div class="faq-answer">Bạn chưa ngồi vào đàn, hoặc đang ở sai game. Ngồi vào ghế piano trước đã.</div>
       </div>
       <div class="faq-item">
         <div class="faq-question" onclick="toggleFaq(this)">
           <span>🔴 Chơi sai nốt, lệch nhịp</span>
           <span class="faq-icon">▼</span>
         </div>
-        <div class="faq-answer">
-          Giảm <b>Tempo</b> và kiểm tra chế độ <b>61 hay 88 phím</b> cho khớp với đàn trong game.
-        </div>
+        <div class="faq-answer">Giảm <b>Tempo</b> và kiểm tra chế độ <b>61 hay 88 phím</b> cho khớp với đàn trong game.</div>
       </div>
       <div class="faq-item">
         <div class="faq-question" onclick="toggleFaq(this)">
           <span>🔴 Bị đá khỏi game</span>
           <span class="faq-icon">▼</span>
         </div>
-        <div class="faq-answer">
-          Giảm tốc độ chơi, tránh sheet quá nặng. Một số game có hệ thống chống gian lận chặt.
-        </div>
+        <div class="faq-answer">Giảm tốc độ chơi, tránh sheet quá nặng. Một số game có hệ thống chống gian lận chặt.</div>
       </div>
     </div>
   </div>
@@ -450,9 +627,7 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
   </div>
   <div class="ai-event-banner">
     <h2 class="ai-event-title">TRỢ LÝ AI CAO CẤP <span>MIỄN PHÍ 1 TUẦN</span></h2>
-    <p class="ai-event-desc">
-      Mở cửa tự do cụm <b>Nagisa AI Cloud</b> cho anh em chiến code (Cursor, Cline, Claude Code). Không cần thẻ!
-    </p>
+    <p class="ai-event-desc">Mở cửa tự do cụm <b>Nagisa AI Cloud</b> cho anh em chiến code (Cursor, Cline, Claude Code). Không cần thẻ!</p>
   </div>
 </div>
 
@@ -485,7 +660,7 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
 <div id="yt-player"></div>
 
 <script>
-  // --- HIỆU ỨNG CHUỘT ---
+  // ============ HIỆU ỨNG CHUỘT ============
   const dot = document.getElementById('cursor-dot');
   const outline = document.getElementById('cursor-outline');
   let mouseX = 0, mouseY = 0, outlineX = 0, outlineY = 0;
@@ -509,6 +684,8 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
   });
 
   document.addEventListener('click', (e) => {
+    // Không tạo ripple khi click trong editor
+    if (e.target.closest('.midi-embed')) return;
     const ripple = document.createElement('div');
     ripple.classList.add('ripple-effect');
     ripple.style.left = e.clientX + 'px';
@@ -519,7 +696,7 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
     setTimeout(() => ripple.remove(), 600);
   });
 
-  // --- HỆ THỐNG NHẠC NỀN ---
+  // ============ NHẠC NỀN YOUTUBE ============
   var tag = document.createElement('script');
   tag.src = "https://www.youtube.com/iframe_api";
   var firstScriptTag = document.getElementsByTagName('script')[0];
@@ -536,27 +713,15 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
     player = new YT.Player('yt-player', {
       height: '0', width: '0',
       videoId: '2C-soKZvOdk',
-      playerVars: {
-        'autoplay': 1,
-        'mute': 0,
-        'controls': 0,
-        'loop': 1,
-        'playlist': '2C-soKZvOdk'
-      },
-      events: {
-        'onReady': onPlayerReady,
-        'onStateChange': onPlayerStateChange
-      }
+      playerVars: { 'autoplay': 1, 'mute': 0, 'controls': 0, 'loop': 1, 'playlist': '2C-soKZvOdk' },
+      events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange }
     });
   }
 
   function onPlayerReady(event) {
     playerReady = true;
     setInterval(updateProgress, 500);
-    if (pendingPlay) {
-      player.playVideo();
-      pendingPlay = false;
-    }
+    if (pendingPlay) { player.playVideo(); pendingPlay = false; }
   }
 
   function onPlayerStateChange(event) {
@@ -581,21 +746,15 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
   introScreen.addEventListener('click', () => {
     introScreen.classList.add('fade-out');
     bottomPlayer.classList.add('show');
-    if (player && playerReady && player.playVideo) {
-      player.playVideo();
-    } else {
-      pendingPlay = true;
-    }
+    if (player && playerReady && player.playVideo) player.playVideo();
+    else pendingPlay = true;
     setTimeout(() => { introScreen.style.display = 'none'; }, 1200);
   });
 
   function togglePlay() {
     if (!player || !playerReady) return;
-    if (isPlaying) {
-      player.pauseVideo();
-    } else {
-      player.playVideo();
-    }
+    if (isPlaying) player.pauseVideo();
+    else player.playVideo();
   }
 
   const progressBarBg = document.getElementById('progressBarBg');
@@ -631,7 +790,7 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
     }
   });
 
-  // --- CHỨC NĂNG CHUYỂN TRANG ---
+  // ============ CHUYỂN TRANG ============
   function switchTab(tabId) {
     document.querySelectorAll('.page-section').forEach(page => page.classList.remove('active-page'));
     document.getElementById('page-' + tabId).classList.add('active-page');
@@ -640,28 +799,29 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
     if(navLink) navLink.classList.add('active');
     window.scrollTo(0, 0);
 
-    if(tabId === 'tools') openTool('none');
+    if (tabId === 'tools') openTool('none');
   }
 
-  // --- CHỨC NĂNG TOOLS MIDI TÍCH HỢP ---
+  // ============ TOOLS MIDI ============
   function openTool(toolName) {
     document.getElementById('tool-list').style.display = 'none';
-    document.getElementById('tool-player').style.display = 'none';
-    document.getElementById('tool-editor').style.display = 'none';
+    document.getElementById('tool-editor').classList.remove('open');
     document.getElementById('tool-converter').style.display = 'none';
+    document.body.classList.remove('editor-open');
 
     if (toolName === 'none') {
       document.getElementById('tool-list').style.display = 'block';
     } else if (toolName === 'converter') {
       document.getElementById('tool-converter').style.display = 'block';
     } else if (toolName === 'editor') {
-      document.getElementById('tool-editor').style.display = 'block';
-    } else if (toolName === 'player') {
-      document.getElementById('tool-player').style.display = 'block';
+      document.getElementById('tool-editor').classList.add('open');
+      document.body.classList.add('editor-open');
+      // Gọi init nếu editor chưa sẵn sàng
+      if (window.__midiInit) window.__midiInit();
     }
   }
 
-  // --- CÁC HÀM COPY ---
+  // ============ COPY ============
   function copyScript() {
     const text = document.getElementById('script-text').innerText.trim();
     const btn = document.getElementById('copyBtn');
@@ -711,6 +871,7 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
     if (!isOpen) item.classList.add('open');
   }
 
+  // ============ PARTICLES ============
   const particleContainer = document.getElementById('particles');
   for (let i = 0; i < 40; i++) {
     let p = document.createElement('div');
@@ -731,6 +892,690 @@ header.scrolled{background:rgba(11,11,15,.95);backdrop-filter:blur(10px);border-
     if (window.scrollY > 50) header.classList.add('scrolled');
     else header.classList.remove('scrolled');
   });
+</script>
+
+<!-- ============ MIDI STUDIO EDITOR (module) ============ -->
+<script type="module">
+import { Midi } from 'https://esm.sh/@tonejs/midi@2.0.28';
+
+// Chờ DOM sẵn sàng (module chạy sau khi parse xong, nhưng để chắc)
+function initMidiEditor(){
+  const $ = id => document.getElementById(id);
+
+  function readRowH(){
+    const v = getComputedStyle(document.querySelector('.midi-embed')).getPropertyValue('--row-h').trim();
+    return parseFloat(v) || 18;
+  }
+
+  const state = {
+    notes: [], selected: null, selectedIds: new Set(),
+    mode: 'add', bpm: 120, beatW: 48,
+    rowH: readRowH(),
+    low: 21, high: 108,
+    filename: '', playing: false,
+    history: [], future: [], nextId: 1,
+    playStart: 0, playTimer: null,
+    inited: false
+  };
+
+  const piano   = $('piano');
+  const grid    = $('grid');
+  const keys    = $('keys');
+  const ruler   = $('ruler');
+  const context = $('context');
+  const scroll  = $('scrollarea');
+  const helpModal = $('helpModal');
+
+  let audioCtx = null, masterGain = null;
+  let drag = null, ctxNote = null, activeVoices = [];
+  const sampleBuffers = new Map(), sampleLoading = new Map();
+  const pianoSampleNotes = [21,24,27,30,33,36,39,42,45,48,51,54,57,60,63,66,69,72,75,78,81,84,87,90,93,96,99,102,105,108];
+
+  function sampleName(m){
+    const names = ["C","Cs","D","Ds","E","F","Fs","G","Gs","A","As","B"];
+    return names[m % 12] + (Math.floor(m / 12) - 1);
+  }
+  function toast(s){
+    $('toast') || (() => {
+      const t = document.createElement('div');
+      t.id = 'toast';
+      document.querySelector('.midi-embed').appendChild(t);
+    })();
+    const el = $('toast');
+    el.textContent = s;
+    el.style.display = 'block';
+    clearTimeout(toast.t);
+    toast.t = setTimeout(() => el.style.display = 'none', 2300);
+  }
+  function snapVal(){ return Number($('midiSnap').value) || .5; }
+  function snap(n){ const s = snapVal(); return Math.max(0, Math.round(n / s) * s); }
+  function noteName(n){
+    return ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'][n % 12] + (Math.floor(n / 12) - 1);
+  }
+  function saveHistory(){
+    state.history.push(JSON.stringify(state.notes));
+    if(state.history.length > 80) state.history.shift();
+    state.future = [];
+    updateUndo();
+  }
+  function updateUndo(){
+    $('midiUndoBtn').disabled = !state.history.length;
+    $('midiRedoBtn').disabled = !state.future.length;
+  }
+  function noteEnd(){ return state.notes.reduce((m, n) => Math.max(m, n.time + n.duration), 16); }
+
+  /* ===== LAYOUT ===== */
+  function layout(){
+    const width  = Math.max(900, Math.ceil(Math.max(16, noteEnd() + 4) * state.beatW));
+    const height = (state.high - state.low + 1) * state.rowH;
+    const keysW  = parseFloat(getComputedStyle(document.querySelector('.midi-embed')).getPropertyValue('--keys-w')) || 90;
+
+    piano.style.width = (width + keysW) + 'px';
+    grid.style.width  = width + 'px';
+    grid.style.height = height + 'px';
+    grid.style.setProperty('--beat', state.beatW + 'px');
+    grid.style.setProperty('--bar',  (state.beatW * 4) + 'px');
+    grid.style.setProperty('--row-h', state.rowH + 'px');
+
+    ruler.style.width = (width + keysW) + 'px';
+    ruler.innerHTML = '';
+    for(let b = 0; b <= Math.ceil(width / state.beatW); b++){
+      const t = document.createElement('div');
+      t.className = 'tick ' + (b % 4 ? 'beat' : '');
+      t.style.left = (keysW + b * state.beatW) + 'px';
+      t.textContent = b % 4 === 0 ? String(b / 4 + 1) : '';
+      ruler.append(t);
+    }
+
+    keys.style.height = height + 'px';
+    keys.innerHTML = '';
+    for(let p = state.high; p >= state.low; p--){
+      const k = document.createElement('div');
+      const black = [1,3,6,8,10].includes(p % 12);
+      k.className = 'key ' + (black ? 'black ' : '') + (p % 12 === 0 ? 'c' : '');
+      k.dataset.pitch = p;
+      k.style.top = ((state.high - p) * state.rowH) + 'px';
+      k.textContent = (p % 12 === 0 || black) ? noteName(p) : '';
+      k.title = 'Phát ' + noteName(p);
+      k.addEventListener('pointerdown', e => {
+        e.preventDefault();
+        playPitch(p, .8);
+        k.style.filter = 'brightness(1.5)';
+        setTimeout(() => k.style.filter = '', 180);
+      });
+      keys.append(k);
+    }
+
+    grid.querySelectorAll('.note').forEach(n => n.remove());
+    state.notes.forEach(n => {
+      const el = document.createElement('div');
+      el.className = 'note' + (state.selectedIds.has(n.id) ? ' selected' : '');
+      el.dataset.id = n.id;
+      el.style.left  = (n.time * state.beatW) + 'px';
+      el.style.top   = ((state.high - n.pitch) * state.rowH + 1) + 'px';
+      el.style.width = Math.max(5, n.duration * state.beatW) + 'px';
+      el.title = noteName(n.pitch) + ' · ' + n.time.toFixed(2) + ' nhịp · ' + n.duration.toFixed(2) + ' nhịp';
+      const rz = document.createElement('span');
+      rz.className = 'resize';
+      el.append(rz);
+      el.addEventListener('pointerdown', e => notePointerDown(e, n, el));
+      el.addEventListener('contextmenu', e => {
+        e.preventDefault(); e.stopPropagation();
+        selectNote(n.id);
+        ctxNote = n.id;
+        showNoteContext(e.clientX, e.clientY);
+      });
+      grid.append(el);
+    });
+
+    $('emptyHint').style.display = state.notes.length ? 'none' : 'grid';
+    $('midiNoteCount').textContent = state.notes.length;
+    $('midiSongLength').textContent = (Math.ceil(noteEnd() / 4 * 10) / 10) + ' ô nhịp';
+    $('midiTrackLabel').textContent = 'Track 1 · ' + (state.filename ? 'đã nhập' : 'mới');
+  }
+
+  function gridCoords(e){
+    const r = grid.getBoundingClientRect();
+    return {
+      beat:  (e.clientX - r.left) / state.beatW,
+      pitch: state.high - Math.floor((e.clientY - r.top) / state.rowH)
+    };
+  }
+
+  function selectNote(id, additive = false){
+    if(!additive) state.selectedIds.clear();
+    if(additive && state.selectedIds.has(id)){
+      state.selectedIds.delete(id);
+      state.selected = state.selectedIds.size ? [...state.selectedIds].at(-1) : null;
+    } else {
+      state.selectedIds.add(id);
+      state.selected = id;
+    }
+    renderSelection();
+  }
+  function renderSelection(){
+    grid.querySelectorAll('.note').forEach(el =>
+      el.classList.toggle('selected', state.selectedIds.has(Number(el.dataset.id)))
+    );
+  }
+  function selectAll(){
+    state.selectedIds = new Set(state.notes.map(n => n.id));
+    state.selected = state.notes.length ? state.notes[state.notes.length - 1].id : null;
+    renderSelection();
+    toast('Đã chọn tất cả ' + state.selectedIds.size + ' nốt');
+  }
+
+  function notePointerDown(e, n, el){
+    if(e.button !== 0) return;
+    e.stopPropagation();
+    hideContext();
+
+    if(e.ctrlKey || e.metaKey || e.shiftKey) selectNote(n.id, true);
+    else if(!state.selectedIds.has(n.id)) selectNote(n.id, false);
+
+    if(state.mode === 'add' && !e.target.classList.contains('resize')) return;
+
+    const resize = e.target.classList.contains('resize');
+    const movingIds = (!resize && state.selectedIds.has(n.id)) ? [...state.selectedIds] : [n.id];
+    const originals = new Map(movingIds.map(id => {
+      const item = state.notes.find(x => x.id === id);
+      return [id, { time: item.time, pitch: item.pitch, duration: item.duration }];
+    }));
+
+    drag = {
+      id: n.id, startX: e.clientX, startY: e.clientY,
+      time: n.time, pitch: n.pitch, duration: n.duration,
+      resize, moved: false, saved: false, movingIds, originals
+    };
+    el.setPointerCapture(e.pointerId);
+    el.classList.add('dragging');
+
+    el.onpointermove = ev => {
+      if(!drag) return;
+      const dx = (ev.clientX - drag.startX) / state.beatW;
+      const dy = Math.round((ev.clientY - drag.startY) / state.rowH);
+      if(Math.abs(ev.clientX - drag.startX) > 2 || Math.abs(ev.clientY - drag.startY) > 2) drag.moved = true;
+      if(!drag.moved) return;
+      if(!drag.saved){ saveHistory(); drag.saved = true; }
+
+      if(drag.resize){
+        const step = snapVal();
+        const raw = Math.max(step, drag.duration + dx);
+        n.duration = Math.max(step, Math.round(raw / step) * step);
+        el.style.width = Math.max(5, n.duration * state.beatW) + 'px';
+        el.title = noteName(n.pitch) + ' · ' + n.duration.toFixed(2) + ' nhịp';
+      } else {
+        for(const id of drag.movingIds){
+          const item = state.notes.find(x => x.id === id);
+          const orig = drag.originals.get(id);
+          if(!item || !orig) continue;
+          item.time  = Math.max(0, snap(orig.time + dx));
+          item.pitch = Math.max(state.low, Math.min(state.high, orig.pitch - dy));
+          const node = grid.querySelector('.note[data-id="' + id + '"]');
+          if(node){
+            node.style.left = (item.time * state.beatW) + 'px';
+            node.style.top  = ((state.high - item.pitch) * state.rowH + 1) + 'px';
+            node.title = noteName(item.pitch);
+          }
+        }
+      }
+    };
+    el.onpointerup = () => {
+      if(drag){
+        el.classList.remove('dragging');
+        if(drag.moved) updateStats();
+        drag = null;
+        render();
+      }
+      el.onpointermove = null;
+      el.onpointerup = null;
+    };
+  }
+
+  grid.addEventListener('click', e => {
+    if(e.target.closest('.note')) return;
+    hideContext();
+    if(state.mode !== 'add'){
+      state.selected = null; state.selectedIds.clear();
+      renderSelection();
+      return;
+    }
+    const c = gridCoords(e);
+    if(c.pitch < state.low || c.pitch > state.high) return;
+    saveHistory();
+    const nn = {
+      id: state.nextId++, pitch: c.pitch,
+      time: snap(c.beat), duration: Number($('midiDuration').value), velocity: .85
+    };
+    state.notes.push(nn);
+    state.selected = nn.id;
+    state.selectedIds = new Set([nn.id]);
+    render();
+    playPitch(nn.pitch, Math.max(.35, Math.min(1.1, nn.duration * 60 / state.bpm)));
+  });
+
+  function showNoteContext(x, y){
+    context.innerHTML = '';
+    const del = document.createElement('button');
+    del.className = 'danger'; del.textContent = '✕ Xóa nốt';
+    del.onclick = () => { if(ctxNote != null) deleteNote(ctxNote); hideContext(); };
+    const dup = document.createElement('button');
+    dup.textContent = '▣ Nhân đôi nốt';
+    dup.onclick = () => {
+      const n = state.notes.find(n => n.id === ctxNote);
+      if(n){
+        saveHistory();
+        const cp = { ...n, id: state.nextId++, time: n.time + n.duration };
+        state.notes.push(cp);
+        state.selected = cp.id;
+        render();
+      }
+      hideContext();
+    };
+    context.append(del, dup);
+    positionContext(x, y);
+  }
+
+  function showGridContext(x, y){
+    context.innerHTML = '';
+    const lbl = document.createElement('div');
+    lbl.className = 'ctx-label'; lbl.textContent = 'Chế độ';
+    const add = document.createElement('button');
+    add.textContent = (state.mode === 'add' ? '● ' : '') + '＋ Tạo nốt';
+    add.onclick = () => { setMode('add'); hideContext(); toast('Đã chuyển sang chế độ Tạo nốt'); };
+    const move = document.createElement('button');
+    move.textContent = (state.mode === 'move' ? '● ' : '') + '↔ Di chuyển';
+    move.onclick = () => { setMode('move'); hideContext(); toast('Đã chuyển sang chế độ Di chuyển'); };
+    const sep1 = document.createElement('div'); sep1.className = 'sep';
+    const all = document.createElement('button');
+    all.innerHTML = '☰ Chọn tất cả <span class="muted small">Ctrl+A</span>';
+    all.onclick = () => { selectAll(); hideContext(); };
+    const help = document.createElement('button');
+    help.textContent = '? Hướng dẫn & phím tắt';
+    help.onclick = () => { hideContext(); openHelp(); };
+    const sep2 = document.createElement('div'); sep2.className = 'sep';
+    const cancel = document.createElement('button');
+    cancel.textContent = 'Đóng';
+    cancel.onclick = hideContext;
+    context.append(lbl, add, move, sep1, all, help, sep2, cancel);
+    positionContext(x, y);
+  }
+
+  function positionContext(x, y){
+    context.style.display = 'block';
+    const w = context.offsetWidth, h = context.offsetHeight;
+    context.style.left = Math.min(x, innerWidth  - w - 8) + 'px';
+    context.style.top  = Math.min(y, innerHeight - h - 8) + 'px';
+  }
+  function hideContext(){ context.style.display = 'none'; ctxNote = null; }
+
+  grid.addEventListener('contextmenu', e => {
+    if(e.target.closest('.note')) return;
+    e.preventDefault();
+    showGridContext(e.clientX, e.clientY);
+  });
+  keys.addEventListener('contextmenu', e => { e.preventDefault(); showGridContext(e.clientX, e.clientY); });
+  ruler.addEventListener('contextmenu', e => { e.preventDefault(); showGridContext(e.clientX, e.clientY); });
+
+  document.addEventListener('click', e => {
+    if(context.style.display === 'block' && !context.contains(e.target)) hideContext();
+  });
+
+  function deleteNote(id){
+    const ids = state.selectedIds.has(id) && state.selectedIds.size > 1 ? [...state.selectedIds] : [id];
+    if(!ids.some(x => state.notes.some(n => n.id === x))) return;
+    saveHistory();
+    state.notes = state.notes.filter(n => !ids.includes(n.id));
+    state.selected = null;
+    state.selectedIds.clear();
+    render();
+  }
+
+  $('midiUndoBtn').onclick = () => {
+    if(!state.history.length) return;
+    state.future.push(JSON.stringify(state.notes));
+    state.notes = JSON.parse(state.history.pop());
+    state.selected = null; state.selectedIds.clear();
+    render();
+  };
+  $('midiRedoBtn').onclick = () => {
+    if(!state.future.length) return;
+    state.history.push(JSON.stringify(state.notes));
+    state.notes = JSON.parse(state.future.pop());
+    state.selected = null; state.selectedIds.clear();
+    render();
+  };
+
+  document.addEventListener('keydown', e => {
+    // Chỉ xử lý khi editor đang mở
+    if(!document.body.classList.contains('editor-open')) return;
+    // Không xử lý khi đang focus vào input/select khác ngoài editor
+    const embed = document.querySelector('.midi-embed');
+    if(!embed.contains(e.target) && !['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName) && e.target !== document.body) return;
+
+    const typing = ['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName);
+
+    if(e.key === 'Escape'){
+      hideContext();
+      if(helpModal.classList.contains('open')){ closeHelp(); return; }
+      state.selectedIds.clear();
+      state.selected = null;
+      renderSelection();
+      return;
+    }
+    if(typing) return;
+
+    if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a'){
+      e.preventDefault(); selectAll(); return;
+    }
+    if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z'){
+      e.preventDefault();
+      if(e.shiftKey) $('midiRedoBtn').click(); else $('midiUndoBtn').click();
+      return;
+    }
+    if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y'){
+      e.preventDefault(); $('midiRedoBtn').click(); return;
+    }
+    if(e.key === 'Backspace' || e.key === 'Delete'){
+      if(state.selectedIds.size){
+        e.preventDefault(); deleteNote(state.selectedIds.values().next().value);
+      } else if(state.selected != null){
+        e.preventDefault(); deleteNote(state.selected);
+      }
+      return;
+    }
+    if(e.code === 'Space'){
+      e.preventDefault();
+      $('midiPlayBtn').click();
+      return;
+    }
+    if(e.key === '?' || e.key === 'F1'){
+      e.preventDefault(); openHelp(); return;
+    }
+  });
+
+  function openHelp(){ helpModal.classList.add('open'); hideContext(); }
+  function closeHelp(){ helpModal.classList.remove('open'); }
+  $('midiHelpBtn').onclick = openHelp;
+  $('helpClose').onclick = closeHelp;
+  helpModal.addEventListener('click', e => { if(e.target === helpModal) closeHelp(); });
+
+  function render(){ layout(); updateStats(); updateUndo(); }
+  function updateStats(){
+    $('midiNoteCount').textContent = state.notes.length;
+    $('midiSongLength').textContent = (Math.ceil(noteEnd() / 4 * 10) / 10) + ' ô nhịp';
+    $('midiStatus').textContent = state.notes.length + ' nốt · ' + (state.mode === 'add' ? 'Chế độ tạo nốt' : 'Chế độ di chuyển');
+  }
+  function setMode(m){
+    state.mode = m;
+    $('midiAddMode').classList.toggle('active', m === 'add');
+    $('midiMoveMode').classList.toggle('active', m === 'move');
+    grid.style.cursor = m === 'add' ? 'crosshair' : 'default';
+    updateStats();
+  }
+  $('midiAddMode').onclick  = () => setMode('add');
+  $('midiMoveMode').onclick = () => setMode('move');
+  $('midiSelectAllBtn').onclick = selectAll;
+
+  $('midiZoomIn').onclick  = () => { state.beatW = Math.min(100, state.beatW + 8); layout(); };
+  $('midiZoomOut').onclick = () => { state.beatW = Math.max(24,  state.beatW - 8); layout(); };
+
+  $('midiBpm').onchange = () => {
+    state.bpm = Math.max(30, Math.min(300, Number($('midiBpm').value) || 120));
+    $('midiBpm').value = state.bpm;
+  };
+
+  $('midiOpenBtn').onclick = () => $('midiFileInput').click();
+  $('midiFileInput').onchange = async e => {
+    if(e.target.files[0]) await loadFile(e.target.files[0]);
+    e.target.value = '';
+  };
+
+  async function loadFile(file){
+    try{
+      const buf  = await file.arrayBuffer();
+      const midi = new Midi(buf);
+      saveHistory();
+      let ns = [], id = 1;
+      for(const tr of midi.tracks){
+        for(const n of tr.notes){
+          ns.push({ id: id++, pitch: n.midi, time: n.time, duration: n.duration, velocity: n.velocity ?? .8 });
+        }
+      }
+      state.bpm = Math.round(midi.header.tempos[0]?.bpm || 120);
+      $('midiBpm').value = state.bpm;
+      state.notes = ns.map(n => ({
+        ...n,
+        time:     n.time     * state.bpm / 60,
+        duration: n.duration * state.bpm / 60
+      }));
+      state.nextId = id;
+      state.selected = null; state.selectedIds.clear();
+      state.filename = file.name;
+      $('midiFileName').textContent = file.name;
+      state.low = 21; state.high = 108;
+      $('midiStatus').textContent = 'Đã tải ' + file.name;
+      render();
+      toast('Đã nhập ' + state.notes.length + ' nốt MIDI');
+    } catch(err){
+      console.error(err);
+      toast('Không đọc được file MIDI. Hãy thử file .mid hợp lệ.');
+    }
+  }
+
+  $('midiExportBtn').onclick = () => {
+    try{
+      const midi = new Midi();
+      midi.header.setTempo(state.bpm);
+      const tr = midi.addTrack();
+      for(const n of state.notes){
+        tr.addNote({
+          midi: n.pitch,
+          time: n.time * 60 / state.bpm,
+          duration: n.duration * 60 / state.bpm,
+          velocity: n.velocity ?? .8
+        });
+      }
+      const bytes = midi.toArray();
+      const blob  = new Blob([bytes], { type: 'audio/midi' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = (state.filename ? state.filename.replace(/\.midi?$/i, '') : 'midi-chinh-sua') + '-edited.mid';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      toast('Đã xuất file MIDI');
+    } catch(e){
+      console.error(e);
+      toast('Xuất MIDI thất bại');
+    }
+  };
+
+  const drop = $('midiDropzone');
+  for(const ev of ['dragenter','dragover'])
+    drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('drag'); });
+  for(const ev of ['dragleave','drop'])
+    drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('drag'); });
+  drop.addEventListener('drop', e => {
+    const f = e.dataTransfer.files[0];
+    if(f) loadFile(f);
+  });
+
+  // ===== AUDIO =====
+  function ensureAudio(){
+    if(!audioCtx){
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) throw new Error('Web Audio không được hỗ trợ');
+      audioCtx = new AC();
+      masterGain = audioCtx.createGain();
+      masterGain.gain.value = .72;
+      masterGain.connect(audioCtx.destination);
+    }
+    if(audioCtx.state === 'suspended') return audioCtx.resume();
+    return Promise.resolve();
+  }
+
+  async function loadPianoSample(midi){
+    const anchor = pianoSampleNotes.reduce(
+      (best, n) => Math.abs(n - midi) < Math.abs(best - midi) ? n : best,
+      pianoSampleNotes[0]
+    );
+    if(sampleBuffers.has(anchor)) return { buffer: sampleBuffers.get(anchor), anchor };
+    if(!sampleLoading.has(anchor)){
+      sampleLoading.set(anchor, (async () => {
+        const url = 'https://tonejs.github.io/audio/salamander/' + sampleName(anchor) + '.mp3';
+        const res = await fetch(url);
+        if(!res.ok) throw new Error('Không tải được mẫu piano');
+        const data = await res.arrayBuffer();
+        const buf  = await audioCtx.decodeAudioData(data);
+        sampleBuffers.set(anchor, buf);
+        return buf;
+      })().finally(() => sampleLoading.delete(anchor)));
+    }
+    return { buffer: await sampleLoading.get(anchor), anchor };
+  }
+
+  function playFallbackPitch(midi, duration = .5, when){
+    const t = Math.max(audioCtx.currentTime + .005, when ?? audioCtx.currentTime);
+    const fundamental = 440 * Math.pow(2, (midi - 69) / 12);
+    const voiceGain = audioCtx.createGain();
+    voiceGain.gain.setValueAtTime(.0001, t);
+    voiceGain.gain.linearRampToValueAtTime(.22, t + .008);
+    voiceGain.gain.setTargetAtTime(.0001, t + Math.max(.12, duration), Math.max(.08, duration * .28));
+    voiceGain.connect(masterGain);
+    const oscillators = [];
+    [[1,.72,'triangle'],[2,.18,'sine'],[3,.06,'sine']].forEach(([ratio, level, type]) => {
+      const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(fundamental * ratio, t);
+      g.gain.value = level;
+      osc.connect(g); g.connect(voiceGain);
+      osc.start(t); osc.stop(t + Math.max(.6, duration + 1));
+      oscillators.push(osc);
+    });
+    activeVoices.push({ osc: oscillators[0], gain: voiceGain, extras: oscillators.slice(1) });
+    oscillators[0].onended = () => {
+      activeVoices = activeVoices.filter(v => v.osc !== oscillators[0]);
+      try{ oscillators.forEach(o => o.disconnect()); voiceGain.disconnect(); }catch{}
+    };
+    return true;
+  }
+
+  async function playPitch(midi, duration = .5, when){
+    try{
+      await ensureAudio();
+      const { buffer, anchor } = await loadPianoSample(midi);
+      const t = Math.max(audioCtx.currentTime + .005, when ?? audioCtx.currentTime);
+      const src  = audioCtx.createBufferSource(), gain = audioCtx.createGain();
+      src.buffer = buffer;
+      src.playbackRate.setValueAtTime(Math.pow(2, (midi - anchor) / 12), t);
+      gain.gain.setValueAtTime(.0001, t);
+      gain.gain.linearRampToValueAtTime(.62, t + .018);
+      gain.gain.setTargetAtTime(.0001, t + Math.max(.12, duration), Math.max(.12, Math.min(.35, duration * .45)));
+      src.connect(gain); gain.connect(masterGain);
+      activeVoices.push({ osc: src, gain });
+      src.onended = () => {
+        activeVoices = activeVoices.filter(v => v.osc !== src);
+        try{ src.disconnect(); gain.disconnect(); }catch{}
+      };
+      src.start(t); src.stop(t + Math.max(2.5, duration + 2.0));
+      return true;
+    } catch(e){
+      console.warn('Mẫu piano không tải được; dùng âm thanh dự phòng:', e);
+      try{ await ensureAudio(); playFallbackPitch(midi, duration, when); return true; }
+      catch(err){
+        console.error(err);
+        toast('Trình duyệt chưa phát được âm thanh. Hãy thử mở bằng Chrome/Edge.');
+        return false;
+      }
+    }
+  }
+
+  $('midiPlayBtn').onclick = () => {
+    if(state.playing){ stopPlayback(); return; }
+    if(!state.notes.length){ toast('Hãy mở file hoặc tạo nốt trước'); return; }
+    ensureAudio().then(async () => {
+      state.playing = true;
+      $('midiPlayBtn').textContent = 'Ⅱ Tạm dừng';
+      $('midiPlayLabel').textContent = 'Đang phát';
+      state.playStart = performance.now();
+      try{
+        await Promise.all([...new Set(state.notes.map(n => n.pitch))].map(p => loadPianoSample(p)));
+      } catch(e){
+        toast('Không tải được một số mẫu piano; hãy kiểm tra Internet');
+      }
+      const start     = audioCtx.currentTime + .12;
+      const wallStart = performance.now() + 120;
+      const head      = $('playhead');
+      head.style.display = 'block';
+      head.style.left = '0px';
+      for(const n of state.notes){
+        playPitch(n.pitch, Math.max(.08, n.duration * 60 / state.bpm), start + n.time * 60 / state.bpm);
+      }
+      const total = Math.max(.1, noteEnd() * 60 / state.bpm);
+      state.playTimer = setInterval(() => {
+        const elapsed = Math.max(0, (performance.now() - wallStart) / 1000);
+        const beat = elapsed * state.bpm / 60;
+        const x = beat * state.beatW;
+        head.style.left = x + 'px';
+        $('midiProgressBar').style.width = (Math.min(1, elapsed / total) * 100) + '%';
+        if(x > scroll.scrollLeft + scroll.clientWidth - 80)
+          scroll.scrollLeft = Math.max(0, x - scroll.clientWidth + 120);
+        if(elapsed >= total) stopPlayback();
+      }, 16);
+    }).catch(e => { console.error(e); toast('Không thể phát âm thanh trong trình duyệt'); });
+  };
+
+  function stopPlayback(){
+    state.playing = false;
+    clearInterval(state.playTimer);
+    if(audioCtx){
+      for(const v of activeVoices){
+        try{
+          v.gain.gain.cancelScheduledValues(audioCtx.currentTime);
+          v.gain.gain.setTargetAtTime(.0001, audioCtx.currentTime, .025);
+          v.osc.stop(audioCtx.currentTime + .12);
+          (v.extras || []).forEach(o => { try{ o.stop(audioCtx.currentTime + .12); }catch{} });
+        }catch{}
+      }
+    }
+    $('midiPlayBtn').textContent = '▶ Phát';
+    $('midiPlayLabel').textContent = 'Đã dừng';
+    $('midiProgressBar').style.width = '0%';
+    $('playhead').style.display = 'none';
+  }
+  $('midiStopBtn').onclick = stopPlayback;
+
+  $('midiCloseBtn').onclick = () => {
+    stopPlayback();
+    openTool('none');
+  };
+
+  new ResizeObserver(() => {
+    const h = readRowH();
+    if(h !== state.rowH){ state.rowH = h; layout(); }
+  }).observe(document.documentElement);
+
+  state.inited = true;
+  render();
+  setMode('add');
+}
+
+// Khởi tạo khi DOM sẵn sàng
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', initMidiEditor);
+} else {
+  initMidiEditor();
+}
+
+// Expose để openTool gọi lại nếu cần
+window.__midiInit = function(){
+  // editor đã init rồi, chỉ cần layout lại (phòng khi bị ẩn lúc init)
+  const grid = document.getElementById('grid');
+  if(grid){
+    const evt = new Event('resize');
+    window.dispatchEvent(evt);
+  }
+};
 </script>
 
 </body>
